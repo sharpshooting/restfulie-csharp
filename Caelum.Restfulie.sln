@@ -1,0 +1,42 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Caelum.Restfulie.Tests", "Caelum.Restfulie.Tests\Caelum.Restfulie.Tests.csproj", "{63951A89-A741-4018-A9F0-04D76CD9B05F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C0F3D4C0-B81C-4114-AA2B-4D72CA675133}"
+	ProjectSection(SolutionItems) = preProject
+		Caelum.Restfulie.vsmdi = Caelum.Restfulie.vsmdi
+		Local.testsettings = Local.testsettings
+		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpShooting.Tests", "SharpShooting.Tests\SharpShooting.Tests.csproj", "{F60FA56F-DCA9-4D19-8CC0-F8D63EA63766}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Caelum.Restfulie", "Caelum.Restfulie\Caelum.Restfulie.csproj", "{EED8678F-652D-4C0A-A12C-A4D6649B303D}"
+EndProject
+Global
+	GlobalSection(TestCaseManagementSettings) = postSolution
+		CategoryFile = Caelum.Restfulie.vsmdi
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{63951A89-A741-4018-A9F0-04D76CD9B05F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63951A89-A741-4018-A9F0-04D76CD9B05F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63951A89-A741-4018-A9F0-04D76CD9B05F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63951A89-A741-4018-A9F0-04D76CD9B05F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F60FA56F-DCA9-4D19-8CC0-F8D63EA63766}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F60FA56F-DCA9-4D19-8CC0-F8D63EA63766}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F60FA56F-DCA9-4D19-8CC0-F8D63EA63766}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F60FA56F-DCA9-4D19-8CC0-F8D63EA63766}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EED8678F-652D-4C0A-A12C-A4D6649B303D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EED8678F-652D-4C0A-A12C-A4D6649B303D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EED8678F-652D-4C0A-A12C-A4D6649B303D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EED8678F-652D-4C0A-A12C-A4D6649B303D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
