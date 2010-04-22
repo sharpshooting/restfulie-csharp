@@ -20,7 +20,7 @@ namespace Caelum.Restfulie.Tests
 
             dynamic dynamicObject = new DynamicXmlObject(XDocument.Parse(xml).Root);
 
-            Assert.AreEqual("value", dynamicObject.Value);
+            Assert.AreEqual("value", dynamicObject.Self());
         }
 
         [TestMethod]
@@ -30,7 +30,7 @@ namespace Caelum.Restfulie.Tests
 
             dynamic dynamicObject = new DynamicXmlObject(XDocument.Parse(xml).Root);
 
-            Assert.AreEqual(string.Empty, dynamicObject.Value);
+            Assert.AreEqual(string.Empty, dynamicObject.Self());
         }
 
         [TestMethod]
@@ -43,7 +43,7 @@ namespace Caelum.Restfulie.Tests
 
             dynamic dynamicObject = new DynamicXmlObject(XDocument.Parse(xml).Root);
 
-            Assert.AreEqual(string.Empty, dynamicObject.Value);
+            Assert.AreEqual(string.Empty, dynamicObject.Self());
         }
 
         [TestMethod]
@@ -51,11 +51,11 @@ namespace Caelum.Restfulie.Tests
         {
             // carlos.mendonca: This seens to be a .NET System.Linq.Xml convention: nested elements get
             //                  concatenated when you call the root element's value.
-            const string xml = XmlHeader + "<a>valueA<a1>valueA1<a11>valueA11</a11></a1><a2>valueA2</a2></a>";
+            const string xml = XmlHeader + "<p>This is a <strong>xhtml</strong> sample.</p>";
 
             dynamic dynamicObject = new DynamicXmlObject(XDocument.Parse(xml).Root);
             
-            Assert.AreEqual("valueAvalueA1valueA11valueA2", dynamicObject.Value);
+            Assert.AreEqual("This is a xhtml sample.", dynamicObject.Self());
         }
 
         [TestMethod]
@@ -105,15 +105,14 @@ namespace Caelum.Restfulie.Tests
 
             dynamic dynamicObject = new DynamicXmlObject(XDocument.Parse(xml).Root);
 
-            Assert.AreEqual("valueB1valueB2", dynamicObject.b.Value);
+            Assert.AreEqual("valueB1valueB2", dynamicObject.b.Self());
             Assert.AreEqual("valueB1", dynamicObject.b[0]);
             Assert.AreEqual("valueB2", dynamicObject.b[1]);
         }
 
-        [TestMethod, Ignore]
+        [TestMethod]
         public void ShouldGetValueFromMultipleFirstLevelElementsByIndex()
         {
-            // TODO: carlos.mendonca: fix this test and its implementation.
             const string xml = XmlHeader + "<a><b>valueB1</b><b>valueB2</b><c>valueC</c><d></d><e/></a>";
 
             dynamic dynamicObject = new DynamicXmlObject(XDocument.Parse(xml).Root);
@@ -126,15 +125,9 @@ namespace Caelum.Restfulie.Tests
 
             Assert.AreEqual("valueB1",    dynamicObject.b[0]);
             Assert.AreEqual("valueB2",    dynamicObject.b[1]);
-            Assert.AreEqual("valueC",     dynamicObject.c[0]);
-            Assert.AreEqual(string.Empty, dynamicObject.d[0]);
-            Assert.AreEqual(string.Empty, dynamicObject.e[0]);
-
-            Assert.AreEqual("valueB1",    dynamicObject.Value[0]);
-            Assert.AreEqual("valueB2",    dynamicObject.Value[1]);
-            Assert.AreEqual("valueC",     dynamicObject.Value[2]);
-            Assert.AreEqual(string.Empty, dynamicObject.Value[3]);
-            Assert.AreEqual(string.Empty, dynamicObject.Value[4]);
+            Assert.AreEqual("valueC",     dynamicObject.c);
+            Assert.AreEqual(string.Empty, dynamicObject.d);
+            Assert.AreEqual(string.Empty, dynamicObject.e);
         }
 
         [TestMethod, Ignore]
@@ -157,13 +150,25 @@ namespace Caelum.Restfulie.Tests
         }
 
         [TestMethod]
+        public void ShouldQueryMultipleFirstLevelElements()
+        {
+            const string xml =
+                XmlHeader +
+                "<order><book><title>Pragmatic Project Automation</title></book><book><title>Coders at Work</title></book></order>";
+
+            dynamic order = new DynamicXmlObject(XDocument.Parse(xml).Root);
+            var bookTitlesInOrder = from dynamic book in order.book
+                                    select book.title;
+        }
+
+        [TestMethod]
         public void ShouldGetValueFromSecondLevelElement()
         {
             const string xml = XmlHeader + "<a><b><c>valueC1</c><c>valueC2</c><d>valueD</d><e></e><f/></b></a>";
 
             dynamic dynamicObject = new DynamicXmlObject(XDocument.Parse(xml).Root);
 
-            Assert.AreEqual("valueC1valueC2", dynamicObject.b.c.Value);
+            Assert.AreEqual("valueC1valueC2", dynamicObject.b.c.Self());
 
             Assert.AreEqual("valueC1", dynamicObject.b.c[0]);
             Assert.AreEqual("valueC2", dynamicObject.b.c[1]);

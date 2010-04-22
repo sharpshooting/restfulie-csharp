@@ -21,31 +21,26 @@ namespace Caelum.Restfulie
         {
             var memberName = binder.Name;
 
-            if (memberName.Equals("value", StringComparison.InvariantCultureIgnoreCase))
-                result = _xElement.Value;
-            else
+            if (_xElement.Elements(memberName).Count() == 1)
             {
-                if (_xElement.Elements(memberName).Count() == 1)
-                {
-                    var xElement = _xElement.Elements(memberName).Single();
+                var xElement = _xElement.Elements(memberName).Single();
 
-                    if (xElement.HasElements)
-                        result = new DynamicXmlObject(xElement);
-                    else
-                        result = xElement.Value;
-                }
-                else if (_xElement.Elements(memberName).Count() > 1)
-                    result = new DynamicXmlObject(new XElement(_xElement.Name, _xElement.Elements(memberName)));
+                if (xElement.HasElements)
+                    result = new DynamicXmlObject(xElement);
                 else
-                    result = null;
+                    result = xElement.Value;
             }
+            else if (_xElement.Elements(memberName).Count() > 1)
+                result = new DynamicXmlObject(new XElement(_xElement.Name, _xElement.Elements(memberName)));
+            else
+                result = null;
 
             return true;
         }
 
         public override bool TryGetIndex(GetIndexBinder binder, object[] indexes, out object result)
         {
-            var index = (int) indexes[0];
+            var index = (int)indexes[0];
 
             if (_xElement.Elements().Count() > index)
                 result = _xElement.Elements().ElementAt(index).Value;
@@ -55,10 +50,22 @@ namespace Caelum.Restfulie
             return true;
         }
 
-        public IEnumerator GetEnumerator()
+        public override bool TryInvokeMember(InvokeMemberBinder binder, object[] args, out object result)
         {
-            // carlos.mendonca: believe it or not, this is equivalent to a yield return.
-            return _xElement.Elements().Select(xElement => xElement.Value).GetEnumerator();
+            result = null;
+
+            if (binder.Name.Equals("self", StringComparison.InvariantCultureIgnoreCase))
+            {
+                result = _xElement.Value;
+            }
+
+            return result != null;
         }
+
+        //public IEnumerator GetEnumerator()
+        //{
+        //    // carlos.mendonca: believe it or not, this is equivalent to a yield return.
+        //    return _xElement.Elements().Select(xElement => xElement.Value).GetEnumerator();
+        //}
     }
 }
