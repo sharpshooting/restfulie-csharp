@@ -56,6 +56,10 @@
       <Project>{EED8678F-652D-4C0A-A12C-A4D6649B303D}</Project>
       <Name>Caelum.Restfulie</Name>
     </ProjectReference>
+    <ProjectReference Include="..\SharpShooting.Tests\SharpShooting.Tests.csproj">
+      <Project>{F60FA56F-DCA9-4D19-8CC0-F8D63EA63766}</Project>
+      <Name>SharpShooting.Tests</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
