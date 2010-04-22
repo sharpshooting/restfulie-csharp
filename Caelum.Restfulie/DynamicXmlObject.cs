@@ -10,11 +10,15 @@ namespace Caelum.Restfulie
 {
     public class DynamicXmlObject : DynamicObject, IEnumerable
     {
-        private readonly XElement _xElement;
+        public enum TryGetMemberBehavior { Loose, Strict }
 
-        public DynamicXmlObject(XElement xElement)
+        private readonly XElement _xElement;
+        private readonly TryGetMemberBehavior _tryGetMemberBehavior;
+
+        public DynamicXmlObject(XElement xElement, TryGetMemberBehavior tryGetMemberBehavior = TryGetMemberBehavior.Loose)
         {
             _xElement = xElement;
+            _tryGetMemberBehavior = tryGetMemberBehavior;
         }
 
         public override bool TryGetMember(GetMemberBinder binder, out object result)
@@ -35,7 +39,7 @@ namespace Caelum.Restfulie
             else
                 result = null;
 
-            return true;
+            return _tryGetMemberBehavior != TryGetMemberBehavior.Strict || result != null;
         }
 
         public override bool TryGetIndex(GetIndexBinder binder, object[] indexes, out object result)
@@ -62,10 +66,10 @@ namespace Caelum.Restfulie
             return result != null;
         }
 
-        //public IEnumerator GetEnumerator()
-        //{
-        //    // carlos.mendonca: believe it or not, this is equivalent to a yield return.
-        //    return _xElement.Elements().Select(xElement => xElement.Value).GetEnumerator();
-        //}
+        public IEnumerator GetEnumerator()
+        {
+            // carlos.mendonca: believe it or not, this is equivalent to a yield return.
+            return _xElement.Elements().Select(xElement => xElement.Value).GetEnumerator();
+        }
     }
 }
