@@ -6,6 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Xml.Linq;
 
+// carlos.mendonca: this has become a general-purpose fluent XML parser; consider moving it to
+//                  SharpShooting.Dynamic.Xml and using it as a base class in Caelum.Restfulie.
 namespace Caelum.Restfulie
 {
     public class DynamicXmlObject : DynamicObject, IEnumerable
