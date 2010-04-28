@@ -194,23 +194,25 @@ namespace Caelum.Restfulie.Tests
         {
             const string xml =
                 XmlHeader +
-                "<a xmlns:atom='http://www.w3.org/2005/Atom'><atom:b>valueB1</atom:b><atom:b>valueB2</atom:b><atom:c>valueC</atom:c><atom:d></atom:d><atom:e/></a>";
+                "<a xmlns:atom='http://www.w3.org/2005/Atom'><atom:b>valueB1</atom:b><atom:b>valueB2</atom:b><atom:c>valueC</atom:c><atom:d></atom:d><atom:e/><f>valueF</f></a>";
 
             dynamic dynamicObject = new DynamicXmlObject(XDocument.Parse(xml).Root);
 
-            Assert.AreEqual("valueB1valueB2valueC", dynamicObject.ToString());
+            Assert.AreEqual("valueB1valueB2valueCvalueF", dynamicObject.ToString());
 
             Assert.AreEqual("valueB1",    dynamicObject.Element("b", "http://www.w3.org/2005/Atom")[0]);
             Assert.AreEqual("valueB2",    dynamicObject.Element("b", "http://www.w3.org/2005/Atom")[1]);
             Assert.AreEqual("valueC",     dynamicObject.Element("c", "http://www.w3.org/2005/Atom"));
             Assert.AreEqual(string.Empty, dynamicObject.Element("d", "http://www.w3.org/2005/Atom"));
             Assert.AreEqual(string.Empty, dynamicObject.Element("e", "http://www.w3.org/2005/Atom"));
+            
+            Assert.AreEqual("valueF", dynamicObject.f);
         }
 
         [TestMethod]
         public void ShouldGetValueFromSecondLevelElementWithNamespace()
         {
-            const string xml = XmlHeader + "<a xmlns:atom='http://www.w3.org/2005/Atom'><atom:b><atom:c>valueC1</atom:c><atom:c>valueC2</atom:c><atom:d>valueD</atom:d><atom:e></atom:e><atom:f/></atom:b></a>";
+            const string xml = XmlHeader + "<a xmlns:atom='http://www.w3.org/2005/Atom'><atom:b><atom:c>valueC1</atom:c><atom:c>valueC2</atom:c><atom:d>valueD</atom:d><atom:e></atom:e><atom:f/><g>valueG</g></atom:b></a>";
 
             dynamic dynamicObject = new DynamicXmlObject(XDocument.Parse(xml).Root);
 
@@ -221,6 +223,8 @@ namespace Caelum.Restfulie.Tests
             Assert.AreEqual("valueD",     dynamicObject.Element("b", "http://www.w3.org/2005/Atom").Element("d", "http://www.w3.org/2005/Atom"));
             Assert.AreEqual(string.Empty, dynamicObject.Element("b", "http://www.w3.org/2005/Atom").Element("e", "http://www.w3.org/2005/Atom"));
             Assert.AreEqual(string.Empty, dynamicObject.Element("b", "http://www.w3.org/2005/Atom").Element("f", "http://www.w3.org/2005/Atom"));
+            
+            Assert.AreEqual("valueG", dynamicObject.Element("b", "http://www.w3.org/2005/Atom").g);
         }
     }
 }
