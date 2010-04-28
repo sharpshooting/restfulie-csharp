@@ -82,7 +82,7 @@ namespace Caelum.Restfulie
             if (binder.Name.Equals("attribute", StringComparison.InvariantCultureIgnoreCase))
             {
                 if (args.Length != 1 && !(args[0] is string))
-                    throw new ArgumentException("Method Attribute takes one string paramenter.");
+                    throw new ArgumentException("Method Attribute takes one string parameter.");
 
                 var xAttribute = _xElement.Attribute((string)args[0]);
                 if (xAttribute != null)
