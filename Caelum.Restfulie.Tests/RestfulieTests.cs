@@ -16,16 +16,18 @@ namespace Caelum.Restfulie.Tests
     public class RestfulieTests
     {
         [TestMethod]
-        public void ShouldGetResourceOnUri()
+        public void ShouldGetResourceOnUriWithPredefinedRequestHeaders()
         {
             var anyUri = new Uri("http://localhost");
 
             var httpClientMock = new Mock<IHttpClient>();
 
-            var restfulie = new Restfulie(httpClientMock.Object);
+            var requestHeaders = new RequestHeaders();
+
+            var restfulie = new Restfulie(httpClientMock.Object, requestHeaders);
             restfulie.At(anyUri);
 
-            httpClientMock.Verify(it => it.Send(HttpMethod.GET, anyUri, It.IsAny<RequestHeaders>()), Times.Once());
+            httpClientMock.Verify(it => it.Send(HttpMethod.GET, anyUri, requestHeaders), Times.Once());
         }
 
         [TestMethod, Ignore]
