@@ -27,21 +27,31 @@ namespace Caelum.Restfulie
         {
             var memberName = binder.Name;
 
-            if (_xElement.Elements(memberName).Count() == 1)
+            result = ResolveElement(memberName);
+
+            return _tryGetMemberBehavior != TryGetMemberBehavior.Strict || result != null;
+        }
+
+        private object ResolveElement(string localName, string namespaceName = "")
+        {
+            object result;
+            var xName = XName.Get(localName, namespaceName);
+            
+            if (_xElement.Elements(xName).Count() == 1)
             {
-                var xElement = _xElement.Elements(memberName).Single();
+                var xElement = _xElement.Elements(xName).Single();
 
                 if (xElement.HasElements)
                     result = new DynamicXmlObject(xElement);
                 else
                     result = xElement.Value;
             }
-            else if (_xElement.Elements(memberName).Count() > 1)
-                result = new DynamicXmlObject(new XElement(_xElement.Name, _xElement.Elements(memberName)));
+            else if (_xElement.Elements(xName).Count() > 1)
+                result = new DynamicXmlObject(new XElement(_xElement.Name, _xElement.Elements(xName)));
             else
                 result = null;
-
-            return _tryGetMemberBehavior != TryGetMemberBehavior.Strict || result != null;
+            
+            return result;
         }
 
         public override bool TryGetIndex(GetIndexBinder binder, object[] indexes, out object result)
@@ -60,9 +70,13 @@ namespace Caelum.Restfulie
         {
             result = null;
 
-            if (binder.Name.Equals("self", StringComparison.InvariantCultureIgnoreCase))
+            if (binder.Name.Equals("element", StringComparison.InvariantCultureIgnoreCase))
             {
-                result = _xElement.Value;
+                if (args.Length != 2 && !(args[0] is string) && !(args[1] is string))
+                    throw new ArgumentException("Method Element takes two string parameters.");
+
+                result = ResolveElement((string) args[0], (string) args[1]);
+                return _tryGetMemberBehavior != TryGetMemberBehavior.Strict || result != null;
             }
 
             return result != null;
@@ -72,6 +86,11 @@ namespace Caelum.Restfulie
         {
             // carlos.mendonca: believe it or not, this is equivalent to a yield return.
             return _xElement.Elements().Select(xElement => xElement.Value).GetEnumerator();
+        }
+
+        public override string ToString()
+        {
+            return _xElement.Value;
         }
     }
 }
