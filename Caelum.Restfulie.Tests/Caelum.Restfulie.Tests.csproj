@@ -38,6 +38,9 @@
       <HintPath>..\References\Microsoft.Http.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="Moq">
+      <HintPath>..\References\Moq.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -58,6 +61,10 @@
     <ProjectReference Include="..\Caelum.Restfulie\Caelum.Restfulie.csproj">
       <Project>{EED8678F-652D-4C0A-A12C-A4D6649B303D}</Project>
       <Name>Caelum.Restfulie</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SharpShooting.Http\SharpShooting.Http.csproj">
+      <Project>{7ECAD147-7C2B-4C8E-8C24-1CE3719EFD88}</Project>
+      <Name>SharpShooting.Http</Name>
     </ProjectReference>
     <ProjectReference Include="..\SharpShooting.Tests\SharpShooting.Tests.csproj">
       <Project>{F60FA56F-DCA9-4D19-8CC0-F8D63EA63766}</Project>

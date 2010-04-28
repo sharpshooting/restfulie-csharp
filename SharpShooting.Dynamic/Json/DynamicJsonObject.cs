@@ -19,13 +19,12 @@ namespace SharpShooting.Dynamic.Json
         public override bool TryInvokeMember(InvokeMemberBinder binder, object[] args, out object result)
         {
             result = null;
+            return false;
+        }
 
-            if (binder.Name.Equals("self", StringComparison.InvariantCultureIgnoreCase))
-            {
-                throw new NotImplementedException();
-            }
-
-            return result != null;
+        public override string ToString()
+        {
+            return _jToken.Value<string>();
         }
     }
 }

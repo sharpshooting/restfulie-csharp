@@ -11,7 +11,7 @@ namespace SharpShooting.Dynamic.Tests
     [TestClass]
     public class DynamicJsonObjectTests
     {
-        [TestMethod, Ignore]
+        [TestMethod]
         public void ShouldGetValueFromCurrentElement()
         {
             // carlos.mendonca: Json.Net doesn't seen to be compatible with '<node>.Value' notation; maybe I
@@ -22,7 +22,7 @@ namespace SharpShooting.Dynamic.Tests
             
             dynamic dynamicObject = new DynamicJsonObject(JObject.Parse(json).Root);
 
-            Assert.AreEqual("value", dynamicObject.Self());
+            Assert.AreEqual("value", dynamicObject.ToString());
         }
     }
 }
