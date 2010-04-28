@@ -18,6 +18,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpShooting.Dynamic", "Sh
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpShooting.Dynamic.Tests", "SharpShooting.Dynamic.Tests\SharpShooting.Dynamic.Tests.csproj", "{77C3F877-7DD5-4E31-AA40-9F0B952D2CF6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpShooting.Http", "SharpShooting.Http\SharpShooting.Http.csproj", "{7ECAD147-7C2B-4C8E-8C24-1CE3719EFD88}"
+EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = Caelum.Restfulie.vsmdi
@@ -47,6 +49,10 @@ Global
 		{77C3F877-7DD5-4E31-AA40-9F0B952D2CF6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{77C3F877-7DD5-4E31-AA40-9F0B952D2CF6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{77C3F877-7DD5-4E31-AA40-9F0B952D2CF6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7ECAD147-7C2B-4C8E-8C24-1CE3719EFD88}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7ECAD147-7C2B-4C8E-8C24-1CE3719EFD88}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7ECAD147-7C2B-4C8E-8C24-1CE3719EFD88}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7ECAD147-7C2B-4C8E-8C24-1CE3719EFD88}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

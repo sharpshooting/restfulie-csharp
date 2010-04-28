@@ -1,8 +1,15 @@
 ﻿using System;
 using Microsoft.Http;
 
-namespace SharpShooting.Tests
+namespace SharpShooting.Http
 {
+    /// <summary>
+    /// This class can be used if you don't want your implementation to hold a reference to
+    /// SharpShooting.Http.IHttpClient, which is implemented by SharpShooting.Http.HttpClientWrapper
+    /// (adapter/DI pattern). What you do is use it in your test to set behavior. An idea for
+    /// improvement is expose delegates just like Microsoft Moles does, so that
+    /// HttpWebRequestTransportStakeFake's behavior can be changed on the test body.
+    /// </summary>
     public class HttpClientFake : HttpClient
     {
         private readonly HttpResponseMessage _httpResponseMessage;
