@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="HttpClientFake.cs" />
     <Compile Include="HttpClientWrapper.cs" />
     <Compile Include="IHttpClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

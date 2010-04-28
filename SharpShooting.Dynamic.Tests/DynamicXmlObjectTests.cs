@@ -5,9 +5,11 @@ using System.Text;
 using System.Xml.Linq;
 using Microsoft.CSharp.RuntimeBinder;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SharpShooting.Dynamic;
+using SharpShooting.Dynamic.Xml;
 using SharpShooting.Tests;
 
-namespace Caelum.Restfulie.Tests
+namespace SharpShooting.Dynamic.Tests
 {
     [TestClass]
     public class DynamicXmlObjectTests
@@ -73,7 +75,7 @@ namespace Caelum.Restfulie.Tests
         }
 
         [TestMethod]
-        public void ShouldGetExceptionOnTryingToGetValueFromInexistentFirstLevelElement()
+        public void ShouldThrowRuntimeBinderExceptionIfElementDoesNotExistOnStrictBinding()
         {
             const string xml = XmlHeader + "<a><b>valueB</b></a>";
 
@@ -188,12 +190,6 @@ namespace Caelum.Restfulie.Tests
             Assert.AreEqual("valueD", dynamicObject.b.d);
             Assert.AreEqual(string.Empty, dynamicObject.b.e);
             Assert.AreEqual(string.Empty, dynamicObject.b.f);
-        }
-
-        [TestMethod, Ignore]
-        public void ShouldThrowRuntimeBinderExceptionIfElementDoesNotExistOnStrictBinding()
-        {
-            // TODO: carlos.mendonca: write this test!
         }
 
         [TestMethod]

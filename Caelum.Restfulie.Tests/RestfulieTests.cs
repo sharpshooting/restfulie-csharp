@@ -11,8 +11,8 @@ namespace Caelum.Restfulie.Tests
     [TestClass]
     public class RestfulieTests
     {
-        [TestMethod]
-        public void ShouldGetResourceFromXml()
+        [TestMethod, Ignore]
+        public void Should()
         {
         }
     }
