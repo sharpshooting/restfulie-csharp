@@ -36,12 +36,12 @@ namespace Caelum.Restfulie
         {
             object result;
             var xName = XName.Get(localName, namespaceName);
-            
+
             if (_xElement.Elements(xName).Count() == 1)
             {
                 var xElement = _xElement.Elements(xName).Single();
 
-                if (xElement.HasElements)
+                if (xElement.HasElements || xElement.HasAttributes)
                     result = new DynamicXmlObject(xElement);
                 else
                     result = xElement.Value;
@@ -50,7 +50,7 @@ namespace Caelum.Restfulie
                 result = new DynamicXmlObject(new XElement(_xElement.Name, _xElement.Elements(xName)));
             else
                 result = null;
-            
+
             return result;
         }
 
@@ -75,11 +75,22 @@ namespace Caelum.Restfulie
                 if (args.Length != 2 && !(args[0] is string) && !(args[1] is string))
                     throw new ArgumentException("Method Element takes two string parameters.");
 
-                result = ResolveElement((string) args[0], (string) args[1]);
+                result = ResolveElement((string)args[0], (string)args[1]);
                 return _tryGetMemberBehavior != TryGetMemberBehavior.Strict || result != null;
             }
 
-            return result != null;
+            if (binder.Name.Equals("attribute", StringComparison.InvariantCultureIgnoreCase))
+            {
+                if (args.Length != 1 && !(args[0] is string))
+                    throw new ArgumentException("Method Attribute takes one string paramenter.");
+
+                var xAttribute = _xElement.Attribute((string)args[0]);
+                if (xAttribute != null)
+                    result = xAttribute.Value;
+                return _tryGetMemberBehavior != TryGetMemberBehavior.Strict || result != null;
+            }
+
+            return false;
         }
 
         public IEnumerator GetEnumerator()

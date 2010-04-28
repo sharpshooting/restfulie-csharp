@@ -144,7 +144,7 @@ namespace Caelum.Restfulie.Tests
         [TestMethod, Ignore]
         public void ShouldIterateTheValuesFromMultipleFirstLevelElements()
         {
-            // carlos.mendonca: i'm not confortable with this implementation.
+            // TODO: carlos.mendonca: I'm not confortable with the assertions in this test.
             const string xml = XmlHeader + "<a><b>value</b><b>value</b><c>value</c></a>";
 
             dynamic dynamicObject = new DynamicXmlObject(XDocument.Parse(xml).Root);
@@ -164,6 +164,7 @@ namespace Caelum.Restfulie.Tests
         public void ShouldQueryMultipleFirstLevelElements()
         {
             // TODO: carlos.mendonca: fix this implementation; maybe use http://jrwren.wrenfam.com/blog/2010/03/04/linq-abuse-with-the-c-4-dynamic-type/
+            
             //const string xml =
             //    XmlHeader +
             //    "<order><book><title>Pragmatic Project Automation</title></book><book><title>Coders at Work</title></book></order>";
@@ -187,6 +188,12 @@ namespace Caelum.Restfulie.Tests
             Assert.AreEqual("valueD", dynamicObject.b.d);
             Assert.AreEqual(string.Empty, dynamicObject.b.e);
             Assert.AreEqual(string.Empty, dynamicObject.b.f);
+        }
+
+        [TestMethod, Ignore]
+        public void ShouldThrowRuntimeBinderExceptionIfElementDoesNotExistOnStrictBinding()
+        {
+            // TODO: carlos.mendonca: write this test!
         }
 
         [TestMethod]
@@ -225,6 +232,45 @@ namespace Caelum.Restfulie.Tests
             Assert.AreEqual(string.Empty, dynamicObject.Element("b", "http://www.w3.org/2005/Atom").Element("f", "http://www.w3.org/2005/Atom"));
             
             Assert.AreEqual("valueG", dynamicObject.Element("b", "http://www.w3.org/2005/Atom").g);
+        }
+
+        [TestMethod]
+        public void ShouldGetValueFromAttributeIfItExists()
+        {
+            // carlos.mendonca: this test introduces a new rule: if the element has an attribute, even if it has
+            //                  no children elements, it has to return DynamicXmlObject so that we can access
+            //                  the attributes. The element's value can only be accessed with the ToString
+            //                  method.
+
+            // carlos.mendonca: System.Xml.Linq.XElement does not support an element with two duplicate
+            //                  attributes.
+            const string xml = XmlHeader + "<a><b attribute1='attributeValueB1' attribute2=''/></a>";
+
+            dynamic dynamicObject = new DynamicXmlObject(XDocument.Parse(xml).Root);
+
+            Assert.AreEqual(string.Empty, dynamicObject.b.ToString());
+
+            Assert.AreEqual("attributeValueB1", dynamicObject.b.Attribute("attribute1"));
+            Assert.AreEqual(string.Empty,      dynamicObject.b.Attribute("attribute2"));
+            Assert.IsNull(dynamicObject.b.Attribute("attribute3"));
+        }
+
+        [TestMethod, Ignore]
+        public void ShouldThrowRuntimeBinderExceptionIfAttributeDoesNotExistOnStrictBinding()
+        {
+            // TODO: carlos.mendonca: write this test!
+        }
+        
+        [TestMethod, Ignore]
+        public void ShouldThrowArgumentExceptionIfElementMethodIsCalledWithWrongSignature()
+        {
+            // TODO: carlos.mendonca: write this test!
+        }
+
+        [TestMethod, Ignore]
+        public void ShouldThrowArgumentExceptionIfAttributeMethodIsCalledWithWrongSignature()
+        {
+            // TODO: carlos.mendonca: write this test!
         }
     }
 }
