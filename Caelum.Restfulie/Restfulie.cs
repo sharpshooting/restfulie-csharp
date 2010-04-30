@@ -9,10 +9,12 @@ namespace Caelum.Restfulie
     public class Restfulie : DynamicObject
     {
         private readonly IHttpClient _httpClient;
-        private readonly RequestHeaders _requestHeaders;
+        private readonly RequestHeaders _requestHeaders; // TODO: carlos.mendonca: explore the use of Microsoft.Http.HttpClient's DefaultHeaders property.
         private readonly IDynamicContentParserFactory _dynamicContentParserFactory;
 
         private readonly dynamic _dynamicContentParser;
+
+        private HttpResponseMessage LatestHttpResponseMessage { get; set; }
 
         public Restfulie(IHttpClient httpClient, RequestHeaders requestHeaders, IDynamicContentParserFactory dynamicContentParserFactory, dynamic dynamicContentParser = null)
         {
@@ -24,14 +26,25 @@ namespace Caelum.Restfulie
 
         public dynamic At(Uri uri)
         {
-            var httpResponseMessage = _httpClient.Send(HttpMethod.GET, uri, _requestHeaders);
+            LatestHttpResponseMessage = _httpClient.Send(HttpMethod.GET, uri, _requestHeaders);
 
-            return new Restfulie(_httpClient, _requestHeaders, _dynamicContentParserFactory, _dynamicContentParserFactory.New(httpResponseMessage.Content));
+            return new Restfulie(
+                _httpClient,
+                _requestHeaders,
+                _dynamicContentParserFactory,
+                _dynamicContentParserFactory.New(LatestHttpResponseMessage.Content))
+                {
+                    LatestHttpResponseMessage = LatestHttpResponseMessage
+                };
         }
 
         public override bool TryGetMember(GetMemberBinder binder, out object result)
         {
-            _dynamicContentParser.TryGetMember(binder, out result);
+            // TODO: carlos.mendonca: find a way to access last httpResponseMessage. Does this mean that _dynamicContentParser becomes a Property which is resolved on call and accessing httpResponseMessage.Content?
+            if (binder.Name.Equals("statuscode", StringComparison.InvariantCultureIgnoreCase))
+                result = ((int)LatestHttpResponseMessage.StatusCode).ToString();
+            else
+                _dynamicContentParser.TryGetMember(binder, out result);
 
             return true;
         }

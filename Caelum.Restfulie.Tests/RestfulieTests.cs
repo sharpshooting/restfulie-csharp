@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Dynamic;
+using System.Net;
 using System.Text;
 using Microsoft.Http;
 using Microsoft.Http.Headers;
@@ -26,7 +27,7 @@ namespace Caelum.Restfulie.Tests
         private class DynamicObjectStub : DynamicObject { }
 
         [TestMethod]
-        public void ShouldGetResourceOnUriWithPredefinedRequestHeaders()
+        public void ShouldGETResourceOnUriWithRequestHeaders()
         {
             var theUri = new Uri("http://localhost");
             var theRequestHeaders = new RequestHeaders();
@@ -56,7 +57,7 @@ namespace Caelum.Restfulie.Tests
                 Content = HttpContent.Create(orderXml, Encoding.UTF8, applicationXmlContentType)
             };
 
-            _httpClientMock.Setup(it => it.Send(HttpMethod.GET, It.IsAny<Uri>(), requestHeaders)).Returns(httpResponseMessage);
+            _httpClientMock.Setup(it => it.Send(It.IsAny<HttpMethod>(), It.IsAny<Uri>(), requestHeaders)).Returns(httpResponseMessage);
 
             _dynamicContentParserFactoryMock.Setup(it => it.New(It.IsAny<HttpContent>())).Returns(new DynamicXmlObject(orderXml));
 
@@ -66,6 +67,21 @@ namespace Caelum.Restfulie.Tests
             Assert.IsInstanceOfType(order, typeof(Restfulie));
             Assert.AreEqual("1", order.id);
         }
+
+        [TestMethod]
+        public void ShouldProvideHttpStatusCodeUponRecievingResponse()
+        {
+            _httpClientMock.Setup(it => it.Send(It.IsAny<HttpMethod>(), It.IsAny<Uri>(), It.IsAny<RequestHeaders>())).Returns(new HttpResponseMessage { StatusCode = HttpStatusCode.OK });
+            _dynamicContentParserFactoryMock.Setup(it => it.New(It.IsAny<HttpContent>())).Returns(new DynamicObjectStub());
+
+            var restfulie = new Restfulie(_httpClientMock.Object, It.IsAny<RequestHeaders>(), _dynamicContentParserFactoryMock.Object);
+            var resource = restfulie.At(It.IsAny<Uri>());
+
+            Assert.AreEqual("200", resource.StatusCode);
+        }
+
+        // TODO: carlos.mendonca: refactor tests to use this:
+        // public void GivenHttpClientReturning(HttpResponseMessage httpResponseMessage, HttpMethod httpMethod = It.IsAny<HttpMethod>(), Uri uri = It.IsAny<Uri>(), RequestHeaders requestHeaders = It.IsAny<RequestHeaders>()) { }
 
         [TestMethod, Ignore]
         public void ShouldRejectUnsupportedContentTypes()
