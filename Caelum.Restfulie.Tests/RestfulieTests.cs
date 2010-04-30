@@ -44,7 +44,7 @@ namespace Caelum.Restfulie.Tests
         }
 
         [TestMethod]
-        public void ShouldGETResourceOnUriWithRequestHeaders()
+        public void ShouldDoGetHttpRequestToUri()
         {
             var theUri = new Uri("http://localhost");
 
