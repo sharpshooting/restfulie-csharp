@@ -43,10 +43,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DynamicContentParserFactory.cs" />
+    <Compile Include="IDynamicContentParserFactory.cs" />
+    <Compile Include="MediaTypeNotSupportedException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Restfulie.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\SharpShooting.Dynamic\SharpShooting.Dynamic.csproj">
+      <Project>{C3ED6F2C-21CF-41D1-B66D-BC95D09DA35B}</Project>
+      <Name>SharpShooting.Dynamic</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SharpShooting.Http\SharpShooting.Http.csproj">
       <Project>{7ECAD147-7C2B-4C8E-8C24-1CE3719EFD88}</Project>
       <Name>SharpShooting.Http</Name>

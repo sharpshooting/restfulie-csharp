@@ -15,6 +15,12 @@ namespace SharpShooting.Dynamic.Xml
         private readonly XElement _xElement;
         private readonly TryGetMemberBehavior _tryGetMemberBehavior;
 
+        public DynamicXmlObject(string xml, TryGetMemberBehavior tryGetMemberBehavior = TryGetMemberBehavior.Loose)
+        {
+            _xElement = XDocument.Parse(xml).Root;
+            _tryGetMemberBehavior = tryGetMemberBehavior;
+        }
+
         public DynamicXmlObject(XElement xElement, TryGetMemberBehavior tryGetMemberBehavior = TryGetMemberBehavior.Loose)
         {
             _xElement = xElement;

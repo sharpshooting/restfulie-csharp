@@ -10,18 +10,30 @@ namespace Caelum.Restfulie
     {
         private readonly IHttpClient _httpClient;
         private readonly RequestHeaders _requestHeaders;
+        private readonly IDynamicContentParserFactory _dynamicContentParserFactory;
 
-        public Restfulie(IHttpClient httpClient, RequestHeaders requestHeaders)
+        private readonly dynamic _dynamicContentParser;
+
+        public Restfulie(IHttpClient httpClient, RequestHeaders requestHeaders, IDynamicContentParserFactory dynamicContentParserFactory, dynamic dynamicContentParser = null)
         {
             _httpClient = httpClient;
             _requestHeaders = requestHeaders;
+            _dynamicContentParserFactory = dynamicContentParserFactory;
+            _dynamicContentParser = dynamicContentParser;
         }
 
         public dynamic At(Uri uri)
         {
-            _httpClient.Send(HttpMethod.GET, uri, _requestHeaders);
+            var httpResponseMessage = _httpClient.Send(HttpMethod.GET, uri, _requestHeaders);
 
-            return null;
+            return new Restfulie(_httpClient, _requestHeaders, _dynamicContentParserFactory, _dynamicContentParserFactory.New(httpResponseMessage.Content));
+        }
+
+        public override bool TryGetMember(GetMemberBinder binder, out object result)
+        {
+            _dynamicContentParser.TryGetMember(binder, out result);
+
+            return true;
         }
     }
 }

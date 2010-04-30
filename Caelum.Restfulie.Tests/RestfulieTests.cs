@@ -1,61 +1,75 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Dynamic;
-using System.Linq;
 using System.Text;
 using Microsoft.Http;
 using Microsoft.Http.Headers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using SharpShooting.Dynamic.Xml;
 using SharpShooting.Http;
-using SharpShooting.Tests;
 
 namespace Caelum.Restfulie.Tests
 {
     [TestClass]
     public class RestfulieTests
     {
+        private Mock<IHttpClient> _httpClientMock;
+        private Mock<IDynamicContentParserFactory> _dynamicContentParserFactoryMock;
+
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            _httpClientMock = new Mock<IHttpClient>();
+            _dynamicContentParserFactoryMock = new Mock<IDynamicContentParserFactory>();
+        }
+
+        private class DynamicObjectStub : DynamicObject { }
+
         [TestMethod]
         public void ShouldGetResourceOnUriWithPredefinedRequestHeaders()
         {
-            var anyUri = new Uri("http://localhost");
+            var theUri = new Uri("http://localhost");
+            var theRequestHeaders = new RequestHeaders();
 
-            var httpClientMock = new Mock<IHttpClient>();
+            const HttpMethod getHttpMethod = HttpMethod.GET;
+
+            _httpClientMock.Setup(it => it.Send(getHttpMethod, theUri, theRequestHeaders)).Returns(new HttpResponseMessage());
+
+            _dynamicContentParserFactoryMock.Setup(it => it.New(It.IsAny<HttpContent>())).Returns(new DynamicObjectStub());
+
+            new Restfulie(_httpClientMock.Object, theRequestHeaders, _dynamicContentParserFactoryMock.Object).At(theUri);
+
+            _httpClientMock.Verify(it => it.Send(getHttpMethod, theUri, theRequestHeaders), Times.Once());
+        }
+
+        [TestMethod]
+        public void ShouldReturnRestfulieWithDynamicXmlObjectAsParserUponReceivingResponseWithXmlContentType()
+        {
+            const string applicationXmlContentType = "application/xml";
+            const string orderXml = "<?xml version='1.0' encoding='UTF-8'?>\r\n<order><id>1</id></order>";
 
             var requestHeaders = new RequestHeaders();
+            requestHeaders.Accept.AddString(applicationXmlContentType);
 
-            var restfulie = new Restfulie(httpClientMock.Object, requestHeaders);
-            restfulie.At(anyUri);
+            var httpResponseMessage = new HttpResponseMessage
+            {
+                Content = HttpContent.Create(orderXml, Encoding.UTF8, applicationXmlContentType)
+            };
 
-            httpClientMock.Verify(it => it.Send(HttpMethod.GET, anyUri, requestHeaders), Times.Once());
+            _httpClientMock.Setup(it => it.Send(HttpMethod.GET, It.IsAny<Uri>(), requestHeaders)).Returns(httpResponseMessage);
+
+            _dynamicContentParserFactoryMock.Setup(it => it.New(It.IsAny<HttpContent>())).Returns(new DynamicXmlObject(orderXml));
+
+            var restfulie = new Restfulie(_httpClientMock.Object, requestHeaders, _dynamicContentParserFactoryMock.Object);
+            var order = restfulie.At(It.IsAny<Uri>());
+
+            Assert.IsInstanceOfType(order, typeof(Restfulie));
+            Assert.AreEqual("1", order.id);
         }
 
         [TestMethod, Ignore]
         public void ShouldRejectUnsupportedContentTypes()
         {
-        }
-
-    }
-
-    // carlos.mendonca: temporary piece of code for reference only.
-    public class RestfuliePrototype : DynamicObject
-    {
-        private DynamicObject _dynamicContentParserObject;
-        private IHttpClient _httpClient;
-
-        public dynamic At(Uri uri)
-        {
-            var httpMessageResponse = _httpClient.Send(HttpMethod.GET, uri);
-
-            // if (httpMessageResponse.Content.ContentType == "text/xml")
-            //     return DynamicXmlObject(XDocument.Parse(httpMessageResponse.ToString());
-
-            return null;
-        }
-
-        public override bool TryInvokeMember(InvokeMemberBinder binder, object[] args, out object result)
-        {
-            return _dynamicContentParserObject.TryInvokeMember(binder, args, out result);
         }
     }
 }
