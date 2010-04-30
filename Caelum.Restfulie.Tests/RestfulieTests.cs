@@ -18,12 +18,108 @@ namespace Caelum.Restfulie.Tests
     {
         private Mock<IHttpClient> _httpClientMock;
         private Mock<IDynamicContentParserFactory> _dynamicContentParserFactoryMock;
+        private Restfulie _restfulie;
 
         [TestInitialize]
         public void TestInitialize()
         {
             _httpClientMock = new Mock<IHttpClient>();
             _dynamicContentParserFactoryMock = new Mock<IDynamicContentParserFactory>();
+            _restfulie = new Restfulie(_httpClientMock.Object, _dynamicContentParserFactoryMock.Object);
+        }
+
+        [TestMethod]
+        public void ShouldDoGetHttpRequestToUri()
+        {
+            var theUri = new Uri("http://localhost");
+
+            const HttpMethod theGetHttpMethod = HttpMethod.GET;
+
+            SetupHttpClientMock(httpMethod: theGetHttpMethod,
+                uri: theUri, httpResponseMessageToReturn: new HttpResponseMessage());
+
+            SetupDynamicContentParserFactoryMock(dynamicObjectToReturn: new DynamicObjectStub());
+
+            _restfulie.At(theUri);
+
+            _httpClientMock.Verify(it => it.Send(theGetHttpMethod, theUri), Times.Once());
+        }
+
+        [TestMethod]
+        public void ShouldReturnSameResponseAsInternalDynamicObjectOnTryGetMemberReturningTrue()
+        {
+            SetupHttpClientMock(httpResponseMessageToReturn: new HttpResponseMessage());
+
+            SetupDynamicContentParserFactoryMock(dynamicObjectToReturn: new DynamicObjectStub { TryGetMemberDelegate = (GetMemberBinder getMemberBinder, out object result) => { result = null; return true; } });
+
+            dynamic dynamicObject = _restfulie.At(It.IsAny<Uri>());
+
+            Assert.IsNull(dynamicObject.AnyMember);
+        }
+
+        [TestMethod, ExpectedException(typeof(RuntimeBinderException))]
+        public void ShouldReturnSameResponseAsInternalDynamicObjectOnTryGetMemberReturningFalse()
+        {
+            SetupHttpClientMock(httpResponseMessageToReturn: new HttpResponseMessage());
+
+            SetupDynamicContentParserFactoryMock(dynamicObjectToReturn: new DynamicObjectStub { TryGetMemberDelegate = (GetMemberBinder getMemberBinder, out object result) => { result = null; return false; } });
+
+            dynamic dynamicObject = _restfulie.At(It.IsAny<Uri>());
+
+            TestHelpers.TryGetAndThrow(dynamicObject.AnyMember);
+        }
+
+        [TestMethod]
+        public void ShouldReturnRestfulieWithDynamicXmlObjectAsParserUponReceivingResponseWithXmlContentType()
+        {
+            const string orderXml = "<?xml version='1.0' encoding='UTF-8'?>\r\n<order><id>1</id></order>";
+
+            SetupHttpClientMock(httpResponseMessageToReturn: new HttpResponseMessage());
+
+            SetupDynamicContentParserFactoryMock(dynamicObjectToReturn: new DynamicXmlObject(orderXml));
+
+            var order = _restfulie.At(It.IsAny<Uri>());
+
+            Assert.IsInstanceOfType(order, typeof(Restfulie));
+            Assert.AreEqual("1", order.id);
+        }
+
+        [TestMethod]
+        public void ShouldProvideHttpStatusCodeUponRecievingResponse()
+        {
+            SetupHttpClientMock(httpResponseMessageToReturn: new HttpResponseMessage { StatusCode = HttpStatusCode.OK });
+
+            SetupDynamicContentParserFactoryMock(dynamicObjectToReturn: new DynamicObjectStub());
+
+            var restfulie = _restfulie;
+            var resource = restfulie.At(It.IsAny<Uri>());
+
+            Assert.AreEqual("200", resource.StatusCode);
+        }
+
+        [TestMethod, Ignore]
+        public void ShouldRejectUnsupportedContentTypes()
+        {
+        }
+
+        private void SetupHttpClientMock(HttpResponseMessage httpResponseMessageToReturn)
+        {
+            SetupHttpClientMock(It.IsAny<HttpMethod>(), It.IsAny<Uri>(), httpResponseMessageToReturn);
+        }
+
+        private void SetupHttpClientMock(HttpMethod httpMethod, Uri uri, HttpResponseMessage httpResponseMessageToReturn)
+        {
+            _httpClientMock.Setup(it => it.Send(httpMethod, uri)).Returns(httpResponseMessageToReturn);
+        }
+
+        private void SetupDynamicContentParserFactoryMock(DynamicObject dynamicObjectToReturn)
+        {
+            SetupDynamicContentParserFactoryMock(It.IsAny<HttpContent>(), dynamicObjectToReturn);
+        }
+
+        private void SetupDynamicContentParserFactoryMock(HttpContent httpContent, DynamicObject dynamicObjectToReturn)
+        {
+            _dynamicContentParserFactoryMock.Setup(it => it.New(httpContent)).Returns(dynamicObjectToReturn);
         }
 
         private class DynamicObjectStub : DynamicObject
@@ -41,92 +137,6 @@ namespace Caelum.Restfulie.Tests
 
                 return base.TryGetMember(binder, out result);
             }
-        }
-
-        [TestMethod]
-        public void ShouldDoGetHttpRequestToUri()
-        {
-            var theUri = new Uri("http://localhost");
-
-            const HttpMethod getHttpMethod = HttpMethod.GET;
-
-            _httpClientMock.Setup(it => it.Send(getHttpMethod, theUri)).Returns(new HttpResponseMessage());
-
-            _dynamicContentParserFactoryMock.Setup(it => it.New(It.IsAny<HttpContent>())).Returns(new DynamicObjectStub());
-
-            new Restfulie(_httpClientMock.Object, _dynamicContentParserFactoryMock.Object).At(theUri);
-
-            _httpClientMock.Verify(it => it.Send(getHttpMethod, theUri), Times.Once());
-        }
-
-        [TestMethod]
-        public void ShouldReturnSameResponseAsInternalDynamicObjectOnTryGetMemberReturningTrue()
-        {
-            _httpClientMock.Setup(it => it.Send(It.IsAny<HttpMethod>(), It.IsAny<Uri>())).Returns(new HttpResponseMessage());
-
-            _dynamicContentParserFactoryMock
-                .Setup(it => it.New(It.IsAny<HttpContent>()))
-                .Returns(new DynamicObjectStub { TryGetMemberDelegate = (GetMemberBinder getMemberBinder, out object result) => { result = null; return true; } });
-
-            dynamic dynamicObject = new Restfulie(_httpClientMock.Object, _dynamicContentParserFactoryMock.Object).At(It.IsAny<Uri>());
-
-            Assert.IsNull(dynamicObject.AnyMember);
-        }
-
-        [TestMethod, ExpectedException(typeof(RuntimeBinderException))]
-        public void ShouldReturnSameResponseAsInternalDynamicObjectOnTryGetMemberReturningFalse()
-        {
-            _httpClientMock.Setup(it => it.Send(It.IsAny<HttpMethod>(), It.IsAny<Uri>())).Returns(new HttpResponseMessage());
-
-            _dynamicContentParserFactoryMock
-                .Setup(it => it.New(It.IsAny<HttpContent>()))
-                .Returns(new DynamicObjectStub { TryGetMemberDelegate = (GetMemberBinder getMemberBinder, out object result) => { result = null; return false; } });
-
-            dynamic dynamicObject = new Restfulie(_httpClientMock.Object, _dynamicContentParserFactoryMock.Object).At(It.IsAny<Uri>());
-
-            TestHelpers.TryGetAndThrow(dynamicObject.AnyMember);
-        }
-
-        [TestMethod]
-        public void ShouldReturnRestfulieWithDynamicXmlObjectAsParserUponReceivingResponseWithXmlContentType()
-        {
-            const string applicationXmlContentType = "application/xml";
-            const string orderXml = "<?xml version='1.0' encoding='UTF-8'?>\r\n<order><id>1</id></order>";
-
-            var httpResponseMessage = new HttpResponseMessage
-            {
-                Content = HttpContent.Create(orderXml, Encoding.UTF8, applicationXmlContentType)
-            };
-
-            _httpClientMock.Setup(it => it.Send(It.IsAny<HttpMethod>(), It.IsAny<Uri>())).Returns(httpResponseMessage);
-
-            _dynamicContentParserFactoryMock.Setup(it => it.New(It.IsAny<HttpContent>())).Returns(new DynamicXmlObject(orderXml));
-
-            var restfulie = new Restfulie(_httpClientMock.Object, _dynamicContentParserFactoryMock.Object);
-            var order = restfulie.At(It.IsAny<Uri>());
-
-            Assert.IsInstanceOfType(order, typeof(Restfulie));
-            Assert.AreEqual("1", order.id);
-        }
-
-        [TestMethod]
-        public void ShouldProvideHttpStatusCodeUponRecievingResponse()
-        {
-            _httpClientMock.Setup(it => it.Send(It.IsAny<HttpMethod>(), It.IsAny<Uri>())).Returns(new HttpResponseMessage { StatusCode = HttpStatusCode.OK });
-            _dynamicContentParserFactoryMock.Setup(it => it.New(It.IsAny<HttpContent>())).Returns(new DynamicObjectStub());
-
-            var restfulie = new Restfulie(_httpClientMock.Object, _dynamicContentParserFactoryMock.Object);
-            var resource = restfulie.At(It.IsAny<Uri>());
-
-            Assert.AreEqual("200", resource.StatusCode);
-        }
-
-        // TODO: carlos.mendonca: refactor tests to use this:
-        // public void GivenHttpClientReturning(HttpResponseMessage httpResponseMessage, HttpMethod httpMethod = It.IsAny<HttpMethod>(), Uri uri = It.IsAny<Uri>(), RequestHeaders requestHeaders = It.IsAny<RequestHeaders>()) { }
-
-        [TestMethod, Ignore]
-        public void ShouldRejectUnsupportedContentTypes()
-        {
         }
     }
 }
