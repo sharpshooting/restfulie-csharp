@@ -9,28 +9,25 @@ namespace Caelum.Restfulie
     public class Restfulie : DynamicObject
     {
         private readonly IHttpClient _httpClient;
-        private readonly RequestHeaders _requestHeaders; // TODO: carlos.mendonca: explore the use of Microsoft.Http.HttpClient's DefaultHeaders property.
         private readonly IDynamicContentParserFactory _dynamicContentParserFactory;
 
         private readonly dynamic _dynamicContentParser;
 
         private HttpResponseMessage LatestHttpResponseMessage { get; set; }
 
-        public Restfulie(IHttpClient httpClient, RequestHeaders requestHeaders, IDynamicContentParserFactory dynamicContentParserFactory, dynamic dynamicContentParser = null)
+        public Restfulie(IHttpClient httpClient, IDynamicContentParserFactory dynamicContentParserFactory, dynamic dynamicContentParser = null)
         {
             _httpClient = httpClient;
-            _requestHeaders = requestHeaders;
             _dynamicContentParserFactory = dynamicContentParserFactory;
             _dynamicContentParser = dynamicContentParser;
         }
 
         public dynamic At(Uri uri)
         {
-            LatestHttpResponseMessage = _httpClient.Send(HttpMethod.GET, uri, _requestHeaders);
+            LatestHttpResponseMessage = _httpClient.Send(HttpMethod.GET, uri);
 
             return new Restfulie(
                 _httpClient,
-                _requestHeaders,
                 _dynamicContentParserFactory,
                 _dynamicContentParserFactory.New(LatestHttpResponseMessage.Content))
                 {

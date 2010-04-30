@@ -30,17 +30,16 @@ namespace Caelum.Restfulie.Tests
         public void ShouldGETResourceOnUriWithRequestHeaders()
         {
             var theUri = new Uri("http://localhost");
-            var theRequestHeaders = new RequestHeaders();
 
             const HttpMethod getHttpMethod = HttpMethod.GET;
 
-            _httpClientMock.Setup(it => it.Send(getHttpMethod, theUri, theRequestHeaders)).Returns(new HttpResponseMessage());
+            _httpClientMock.Setup(it => it.Send(getHttpMethod, theUri)).Returns(new HttpResponseMessage());
 
             _dynamicContentParserFactoryMock.Setup(it => it.New(It.IsAny<HttpContent>())).Returns(new DynamicObjectStub());
 
-            new Restfulie(_httpClientMock.Object, theRequestHeaders, _dynamicContentParserFactoryMock.Object).At(theUri);
+            new Restfulie(_httpClientMock.Object, _dynamicContentParserFactoryMock.Object).At(theUri);
 
-            _httpClientMock.Verify(it => it.Send(getHttpMethod, theUri, theRequestHeaders), Times.Once());
+            _httpClientMock.Verify(it => it.Send(getHttpMethod, theUri), Times.Once());
         }
 
         [TestMethod]
@@ -49,32 +48,29 @@ namespace Caelum.Restfulie.Tests
             const string applicationXmlContentType = "application/xml";
             const string orderXml = "<?xml version='1.0' encoding='UTF-8'?>\r\n<order><id>1</id></order>";
 
-            var requestHeaders = new RequestHeaders();
-            requestHeaders.Accept.AddString(applicationXmlContentType);
-
             var httpResponseMessage = new HttpResponseMessage
             {
                 Content = HttpContent.Create(orderXml, Encoding.UTF8, applicationXmlContentType)
             };
 
-            _httpClientMock.Setup(it => it.Send(It.IsAny<HttpMethod>(), It.IsAny<Uri>(), requestHeaders)).Returns(httpResponseMessage);
+            _httpClientMock.Setup(it => it.Send(It.IsAny<HttpMethod>(), It.IsAny<Uri>())).Returns(httpResponseMessage);
 
             _dynamicContentParserFactoryMock.Setup(it => it.New(It.IsAny<HttpContent>())).Returns(new DynamicXmlObject(orderXml));
 
-            var restfulie = new Restfulie(_httpClientMock.Object, requestHeaders, _dynamicContentParserFactoryMock.Object);
+            var restfulie = new Restfulie(_httpClientMock.Object, _dynamicContentParserFactoryMock.Object);
             var order = restfulie.At(It.IsAny<Uri>());
 
             Assert.IsInstanceOfType(order, typeof(Restfulie));
             Assert.AreEqual("1", order.id);
         }
-
+        
         [TestMethod]
         public void ShouldProvideHttpStatusCodeUponRecievingResponse()
         {
-            _httpClientMock.Setup(it => it.Send(It.IsAny<HttpMethod>(), It.IsAny<Uri>(), It.IsAny<RequestHeaders>())).Returns(new HttpResponseMessage { StatusCode = HttpStatusCode.OK });
+            _httpClientMock.Setup(it => it.Send(It.IsAny<HttpMethod>(), It.IsAny<Uri>())).Returns(new HttpResponseMessage { StatusCode = HttpStatusCode.OK });
             _dynamicContentParserFactoryMock.Setup(it => it.New(It.IsAny<HttpContent>())).Returns(new DynamicObjectStub());
 
-            var restfulie = new Restfulie(_httpClientMock.Object, It.IsAny<RequestHeaders>(), _dynamicContentParserFactoryMock.Object);
+            var restfulie = new Restfulie(_httpClientMock.Object, _dynamicContentParserFactoryMock.Object);
             var resource = restfulie.At(It.IsAny<Uri>());
 
             Assert.AreEqual("200", resource.StatusCode);

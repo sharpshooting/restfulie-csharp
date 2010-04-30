@@ -10,9 +10,12 @@ namespace SharpShooting.Http
         private readonly HttpClient _httpClient;
         private bool _disposed = false;
 
-        public HttpClientWrapper(HttpClient httpClient)
+        public HttpClientWrapper(HttpClient httpClient, RequestHeaders requestHeaders = null)
         {
             _httpClient = httpClient;
+
+            if (requestHeaders != null)
+                _httpClient.DefaultHeaders = requestHeaders;
         }
 
         public RequestHeaders DefaultHeaders
