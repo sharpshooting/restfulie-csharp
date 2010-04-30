@@ -1,5 +1,5 @@
 ﻿using Microsoft.Http;
-using SharpShooting.Dynamic.Xml;
+using SharpShooting.Dynamic;
 
 namespace Caelum.Restfulie
 {
@@ -10,10 +10,10 @@ namespace Caelum.Restfulie
     /// </summary>
     public class DynamicContentParserFactory : IDynamicContentParserFactory
     {
-        public dynamic New(HttpContent httpContent)
+        public IDynamicContentParser New(HttpContent httpContent)
         {
             if (httpContent.ContentType == "application/xml")
-                return new DynamicXmlObject(httpContent.ReadAsString());
+                return new DynamicXmlContentParser(httpContent.ReadAsString());
 
             throw new MediaTypeNotSupportedException();
         }

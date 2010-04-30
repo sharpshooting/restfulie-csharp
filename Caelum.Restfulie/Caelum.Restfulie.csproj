@@ -44,6 +44,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DynamicContentParserFactory.cs" />
+    <Compile Include="DynamicXmlContentParser.cs" />
+    <Compile Include="IDynamicContentParser.cs" />
     <Compile Include="IDynamicContentParserFactory.cs" />
     <Compile Include="MediaTypeNotSupportedException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

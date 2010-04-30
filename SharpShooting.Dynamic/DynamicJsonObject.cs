@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using Newtonsoft.Json.Linq;
 
-namespace SharpShooting.Dynamic.Json
+namespace SharpShooting.Dynamic
 {
     public class DynamicJsonObject : DynamicObject
     {

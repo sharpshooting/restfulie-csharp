@@ -6,7 +6,7 @@ using System.Text;
 using Microsoft.Http;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using SharpShooting.Dynamic.Xml;
+using SharpShooting.Dynamic;
 
 namespace Caelum.Restfulie.Tests
 {

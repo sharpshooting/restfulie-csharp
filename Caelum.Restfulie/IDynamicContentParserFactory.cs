@@ -4,6 +4,6 @@ namespace Caelum.Restfulie
 {
     public interface IDynamicContentParserFactory
     {
-        dynamic New(HttpContent httpContent);
+        IDynamicContentParser New(HttpContent httpContent);
     }
 }

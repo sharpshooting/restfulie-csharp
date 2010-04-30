@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json.Linq;
-using SharpShooting.Dynamic.Json;
 
 namespace SharpShooting.Dynamic.Tests
 {

@@ -11,8 +11,8 @@ namespace Caelum.Restfulie
         private readonly IHttpClient _httpClient;
         private readonly IDynamicContentParserFactory _dynamicContentParserFactory;
 
-        private DynamicObject DynamicContentParser { get; set; }
-        private HttpResponseMessage LatestHttpResponseMessage { get; set; }
+        public IDynamicContentParser DynamicContentParser { get; set; }
+        public HttpResponseMessage LatestHttpResponseMessage { get; set; }
 
         public Restfulie(IHttpClient httpClient, IDynamicContentParserFactory dynamicContentParserFactory)
         {
@@ -38,6 +38,17 @@ namespace Caelum.Restfulie
             else
                 return DynamicContentParser.TryGetMember(binder, out result);
 
+            return true;
+        }
+
+        public override bool TryInvokeMember(InvokeMemberBinder binder, object[] args, out object result)
+        {
+            //var uri = (DynamicContentParser as IDynamicContentParser).Link(binder.Name);
+
+            //if (uri != null)
+            //    _httpClient.Send(HttpMethod.GET, uri);
+
+            result = null;
             return true;
         }
     }

@@ -1,18 +1,18 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
-using System.Text;
 using System.Xml.Linq;
 
-namespace SharpShooting.Dynamic.Xml
+namespace SharpShooting.Dynamic
 {
     public class DynamicXmlObject : DynamicObject, IEnumerable
     {
         public enum TryGetMemberBehavior { Loose, Strict }
 
         private readonly XElement _xElement;
+        protected XElement XElement { get { return _xElement; } }
+        
         private readonly TryGetMemberBehavior _tryGetMemberBehavior;
 
         public DynamicXmlObject(string xml, TryGetMemberBehavior tryGetMemberBehavior = TryGetMemberBehavior.Loose)
@@ -35,23 +35,24 @@ namespace SharpShooting.Dynamic.Xml
 
             return _tryGetMemberBehavior != TryGetMemberBehavior.Strict || result != null;
         }
-
+        
         private object ResolveElement(string localName, string namespaceName = "")
         {
             object result;
-            var xName = XName.Get(localName, namespaceName);
 
-            if (_xElement.Elements(xName).Count() == 1)
+            var xElements = XElement.Elements(XName.Get(localName, namespaceName));
+
+            if (xElements.Count() == 1)
             {
-                var xElement = _xElement.Elements(xName).Single();
+                var xElement = xElements.Single();
 
                 if (xElement.HasElements || xElement.HasAttributes)
                     result = new DynamicXmlObject(xElement);
                 else
                     result = xElement.Value;
             }
-            else if (_xElement.Elements(xName).Count() > 1)
-                result = new DynamicXmlObject(new XElement(_xElement.Name, _xElement.Elements(xName)));
+            else if (xElements.Count() > 1)
+                result = new DynamicXmlObject(new XElement(XElement.Name, xElements));
             else
                 result = null;
 
@@ -62,8 +63,8 @@ namespace SharpShooting.Dynamic.Xml
         {
             var index = (int)indexes[0];
 
-            if (_xElement.Elements().Count() > index)
-                result = _xElement.Elements().ElementAt(index).Value;
+            if (XElement.Elements().Count() > index)
+                result = XElement.Elements().ElementAt(index).Value;
             else
                 result = null;
 
@@ -88,7 +89,7 @@ namespace SharpShooting.Dynamic.Xml
                 if (args.Length != 1 && !(args[0] is string))
                     throw new ArgumentException("Method Attribute takes one string parameter.");
 
-                var xAttribute = _xElement.Attribute((string)args[0]);
+                var xAttribute = XElement.Attribute((string)args[0]);
                 if (xAttribute != null)
                     result = xAttribute.Value;
                 return _tryGetMemberBehavior != TryGetMemberBehavior.Strict || result != null;
@@ -100,12 +101,12 @@ namespace SharpShooting.Dynamic.Xml
         public IEnumerator GetEnumerator()
         {
             // carlos.mendonca: believe it or not, this is equivalent to a yield return.
-            return _xElement.Elements().Select(xElement => xElement.Value).GetEnumerator();
+            return XElement.Elements().Select(xElement => xElement.Value).GetEnumerator();
         }
 
         public override string ToString()
         {
-            return _xElement.Value;
+            return XElement.Value;
         }
     }
 }

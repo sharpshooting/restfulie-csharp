@@ -6,7 +6,6 @@ using System.Xml.Linq;
 using Microsoft.CSharp.RuntimeBinder;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SharpShooting.Dynamic;
-using SharpShooting.Dynamic.Xml;
 using SharpShooting.Tests;
 
 namespace SharpShooting.Dynamic.Tests
