@@ -15,7 +15,7 @@ namespace Caelum.Restfulie
             if (httpContent.ContentType == "application/xml")
                 return new DynamicXmlContentParser(httpContent.ReadAsString());
 
-            throw new MediaTypeNotSupportedException();
+            throw new UnsupportedMediaTypeException();
         }
     }
 }

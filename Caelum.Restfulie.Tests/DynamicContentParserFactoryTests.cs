@@ -26,7 +26,7 @@ namespace Caelum.Restfulie.Tests
             Assert.IsInstanceOfType(dynamicObject, typeof(DynamicXmlObject));
         }
 
-        [TestMethod, ExpectedException(typeof(MediaTypeNotSupportedException))]
+        [TestMethod, ExpectedException(typeof(UnsupportedMediaTypeException))]
         public void ShouldThrowMediaTypeNotSupportedExceptionOnUnkownContentType()
         {
             var httpContent = HttpContent.Create(String.Empty, _anyEncoding, "application/unknown");
