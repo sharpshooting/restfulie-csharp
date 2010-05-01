@@ -31,16 +31,25 @@ namespace Caelum.Restfulie.Tests
         public void ShouldDoAGetHttpRequestToUri()
         {
             var theUri = new Uri("http://localhost");
-
             const HttpMethod theGetHttpMethod = HttpMethod.GET;
-
             SetupHttpClientMock(theGetHttpMethod, theUri, new HttpResponseMessage());
-
-            SetupDynamicContentParserFactoryMock(new DynamicObjectStub());
 
             _restfulie.At(theUri);
 
             _httpClientMock.Verify(it => it.Send(theGetHttpMethod, theUri), Times.Once());
+        }
+
+        [TestMethod]
+        public void ShouldSetLatestHttpResponseMessageUponEntryPoint()
+        {
+            var httpResponseMessage = new HttpResponseMessage();
+            SetupHttpClientMock(httpResponseMessage);
+
+            Assert.IsNull(_restfulie.LatestHttpResponseMessage);
+
+            _restfulie.At(new Uri("http://localhost"));
+
+            Assert.AreSame(httpResponseMessage, _restfulie.LatestHttpResponseMessage);
         }
 
         [TestMethod]
@@ -100,22 +109,42 @@ namespace Caelum.Restfulie.Tests
         }
 
         [TestMethod]
-        public void ShouldDoGetHttpRequestToAtomLinkOnResource()
+        public void ShouldDoAGetHttpRequestToAtomLinkOnResourceAndShouldSetLatestHttpResponseMessage()
         {
-            const string orderXml = "<?xml version='1.0' encoding='UTF-8'?>\r\n<order><id>1</id><atom:link rel='refresh' href='http://localhost/orders/1' atom:xmlns='http://www.w3.org/2005/Atom'/></order>";
+            const string orderXml = "<?xml version='1.0' encoding='UTF-8'?>\r\n<order><id>1</id><atom:link rel='refresh' href='http://localhost/orders/1' xmlns:atom='http://www.w3.org/2005/Atom'/></order>";
 
-            SetupHttpClientMock(new HttpResponseMessage()); // TODO: carlos.mendonca: change this.
-            SetupDynamicContentParserFactoryMock(It.IsAny<IDynamicContentParser>());
+            SetupHttpClientMock(new HttpResponseMessage());
 
             dynamic order = new Restfulie(_httpClientMock.Object, _dynamicContentParserFactoryMock.Object)
             {
                 DynamicContentParser = new DynamicXmlContentParser(orderXml),
-                LatestHttpResponseMessage = It.IsAny<HttpResponseMessage>()
             };
 
             order.refresh();
 
             _httpClientMock.Verify(it => it.Send(HttpMethod.GET, new Uri("http://localhost/orders/1")), Times.Once());
+        }
+
+        [TestMethod]
+        public void ShouldSetLatestHttpResponseMessageWhenFollowingAtomLink()
+        {
+            const string orderXml = "<?xml version='1.0' encoding='UTF-8'?>\r\n<order><id>1</id><atom:link rel='refresh' href='http://localhost/orders/1' xmlns:atom='http://www.w3.org/2005/Atom'/></order>";
+
+            var firstHttpResponseMesage = new HttpResponseMessage();
+            var secondHttpResponseMesage = new HttpResponseMessage();
+
+            SetupHttpClientMock(secondHttpResponseMesage);
+
+            dynamic order = new Restfulie(_httpClientMock.Object, _dynamicContentParserFactoryMock.Object)
+            {
+                DynamicContentParser = new DynamicXmlContentParser(orderXml),
+                LatestHttpResponseMessage = firstHttpResponseMesage
+            };
+
+            dynamic orderAfterRefresh = order.refresh();
+
+            Assert.AreSame((order as Restfulie).LatestHttpResponseMessage, firstHttpResponseMesage);
+            Assert.AreSame((orderAfterRefresh as Restfulie).LatestHttpResponseMessage, secondHttpResponseMesage);
         }
 
         [TestMethod, Ignore]
@@ -125,7 +154,7 @@ namespace Caelum.Restfulie.Tests
 
         private void SetupHttpClientMock(HttpResponseMessage httpResponseMessageToReturn)
         {
-            SetupHttpClientMock(It.IsAny<HttpMethod>(), It.IsAny<Uri>(), httpResponseMessageToReturn);
+            _httpClientMock.Setup(it => it.Send(It.IsAny<HttpMethod>(), It.IsAny<Uri>())).Returns(httpResponseMessageToReturn);
         }
 
         private void SetupHttpClientMock(HttpMethod httpMethod, Uri uri, HttpResponseMessage httpResponseMessageToReturn)
@@ -135,7 +164,7 @@ namespace Caelum.Restfulie.Tests
 
         private void SetupDynamicContentParserFactoryMock(IDynamicContentParser dynamicContentParser)
         {
-            SetupDynamicContentParserFactoryMock(It.IsAny<HttpContent>(), dynamicContentParser);
+            _dynamicContentParserFactoryMock.Setup(it => it.New(It.IsAny<HttpContent>())).Returns(dynamicContentParser);
         }
 
         private void SetupDynamicContentParserFactoryMock(HttpContent httpContent, IDynamicContentParser dynamicContentParser)

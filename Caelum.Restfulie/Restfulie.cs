@@ -43,12 +43,21 @@ namespace Caelum.Restfulie
 
         public override bool TryInvokeMember(InvokeMemberBinder binder, object[] args, out object result)
         {
-            //var uri = (DynamicContentParser as IDynamicContentParser).Link(binder.Name);
-
-            //if (uri != null)
-            //    _httpClient.Send(HttpMethod.GET, uri);
-
             result = null;
+
+            var uri = DynamicContentParser.UriFor(binder.Name);
+
+            if (uri != null)
+            {
+                var latestHttpResponseMessage = _httpClient.Send(HttpMethod.GET, uri);
+
+                result = new Restfulie(_httpClient, _dynamicContentParserFactory)
+                {
+                    LatestHttpResponseMessage = latestHttpResponseMessage,
+                    DynamicContentParser = _dynamicContentParserFactory.New(latestHttpResponseMessage.Content)
+                };
+            }
+
             return true;
         }
     }
