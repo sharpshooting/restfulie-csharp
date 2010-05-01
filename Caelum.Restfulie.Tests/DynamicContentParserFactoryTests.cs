@@ -23,7 +23,7 @@ namespace Caelum.Restfulie.Tests
 
             dynamic dynamicObject = new DynamicContentParserFactory().New(httpContent);
 
-            Assert.IsInstanceOfType(dynamicObject, typeof(DynamicXmlObject));
+            Assert.IsInstanceOfType(dynamicObject, typeof(DynamicXmlContentParser));
         }
 
         [TestMethod, ExpectedException(typeof(UnsupportedMediaTypeException))]
