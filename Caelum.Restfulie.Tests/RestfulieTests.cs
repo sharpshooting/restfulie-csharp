@@ -117,6 +117,8 @@ namespace Caelum.Restfulie.Tests
 
             SetupHttpClientMock(new HttpResponseMessage());
 
+            _httpMethodDiscoveryMock.Setup(it => it.MethodFor(It.IsAny<string>())).Returns(HttpMethod.GET);
+
             dynamic order = new Restfulie(_httpClientMock.Object, _dynamicContentParserFactoryMock.Object, _httpMethodDiscoveryMock.Object)
             {
                 DynamicContentParser = new DynamicXmlContentParser(orderXml),
