@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Linq;
 using System.Xml.Linq;
+using SharpShooting.Dynamic;
 
 namespace Caelum.Restfulie
 {
-    public class DynamicXmlContentParser : SharpShooting.Dynamic.DynamicXmlObject, IDynamicContentParser
+    public class DynamicXmlContentParser : DynamicXmlObject, IDynamicContentParser
     {
         public DynamicXmlContentParser(string xml)
             : base(xml)
