@@ -17,6 +17,7 @@ namespace Caelum.Restfulie.Tests
     {
         private Mock<IHttpClient> _httpClientMock;
         private Mock<IDynamicContentParserFactory> _dynamicContentParserFactoryMock;
+        private Mock<IHttpMethodDiscovery> _httpMethodDiscoveryMock;
         private Restfulie _restfulie;
 
         [TestInitialize]
@@ -24,7 +25,8 @@ namespace Caelum.Restfulie.Tests
         {
             _httpClientMock = new Mock<IHttpClient>();
             _dynamicContentParserFactoryMock = new Mock<IDynamicContentParserFactory>();
-            _restfulie = new Restfulie(_httpClientMock.Object, _dynamicContentParserFactoryMock.Object);
+            _httpMethodDiscoveryMock = new Mock<IHttpMethodDiscovery>();
+            _restfulie = new Restfulie(_httpClientMock.Object, _dynamicContentParserFactoryMock.Object, _httpMethodDiscoveryMock.Object);
         }
 
         [TestMethod]
@@ -115,7 +117,7 @@ namespace Caelum.Restfulie.Tests
 
             SetupHttpClientMock(new HttpResponseMessage());
 
-            dynamic order = new Restfulie(_httpClientMock.Object, _dynamicContentParserFactoryMock.Object)
+            dynamic order = new Restfulie(_httpClientMock.Object, _dynamicContentParserFactoryMock.Object, _httpMethodDiscoveryMock.Object)
             {
                 DynamicContentParser = new DynamicXmlContentParser(orderXml),
             };
@@ -123,6 +125,21 @@ namespace Caelum.Restfulie.Tests
             order.refresh();
 
             _httpClientMock.Verify(it => it.Send(HttpMethod.GET, new Uri("http://localhost/orders/1")), Times.Once());
+        }
+
+        [TestMethod]
+        public void ShouldDoMakeHttpRequestWithHttpMethodDiscovery()
+        {
+            SetupHttpClientMock(new HttpResponseMessage());
+
+            dynamic resource = new Restfulie(_httpClientMock.Object, _dynamicContentParserFactoryMock.Object, _httpMethodDiscoveryMock.Object)
+            {
+                DynamicContentParser = new DynamicObjectStub()
+            };
+
+            resource.AnyMethod();
+
+            _httpMethodDiscoveryMock.Verify(it => it.MethodFor(It.IsAny<string>()));
         }
 
         [TestMethod]
@@ -135,7 +152,7 @@ namespace Caelum.Restfulie.Tests
 
             SetupHttpClientMock(secondHttpResponseMesage);
 
-            dynamic order = new Restfulie(_httpClientMock.Object, _dynamicContentParserFactoryMock.Object)
+            dynamic order = new Restfulie(_httpClientMock.Object, _dynamicContentParserFactoryMock.Object, _httpMethodDiscoveryMock.Object)
             {
                 DynamicContentParser = new DynamicXmlContentParser(orderXml),
                 LatestHttpResponseMessage = firstHttpResponseMesage
@@ -178,6 +195,8 @@ namespace Caelum.Restfulie.Tests
 
             public Func<GetMemberBinder, object, bool> TryGetMemberDelegate { get; set; }
 
+            public Func<string, Uri> UriForDelegate { get; set; }
+
             public new bool TryGetMember(GetMemberBinder binder, out object result)
             {
                 if (TryGetMemberDelegate != null)
@@ -190,7 +209,12 @@ namespace Caelum.Restfulie.Tests
 
             public Uri UriFor(string stateTransition)
             {
-                throw new NotImplementedException();
+                if (UriForDelegate != null)
+                {
+                    return UriForDelegate(stateTransition);
+                }
+
+                return new Uri("http://localhost");
             }
         }
     }

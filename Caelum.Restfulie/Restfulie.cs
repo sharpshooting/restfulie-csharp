@@ -10,21 +10,23 @@ namespace Caelum.Restfulie
     {
         private readonly IHttpClient _httpClient;
         private readonly IDynamicContentParserFactory _dynamicContentParserFactory;
+        private readonly IHttpMethodDiscovery _httpMethodDiscovery;
 
         public IDynamicContentParser DynamicContentParser { get; set; }
         public HttpResponseMessage LatestHttpResponseMessage { get; set; }
 
-        public Restfulie(IHttpClient httpClient, IDynamicContentParserFactory dynamicContentParserFactory)
+        public Restfulie(IHttpClient httpClient, IDynamicContentParserFactory dynamicContentParserFactory, IHttpMethodDiscovery httpMethodDiscovery)
         {
             _httpClient = httpClient;
             _dynamicContentParserFactory = dynamicContentParserFactory;
+            _httpMethodDiscovery = httpMethodDiscovery;
         }
 
         public dynamic At(Uri uri)
         {
             LatestHttpResponseMessage = _httpClient.Send(HttpMethod.GET, uri);
 
-            return new Restfulie(_httpClient, _dynamicContentParserFactory)
+            return new Restfulie(_httpClient, _dynamicContentParserFactory, _httpMethodDiscovery)
                        {
                            LatestHttpResponseMessage = LatestHttpResponseMessage,
                            DynamicContentParser = _dynamicContentParserFactory.New(LatestHttpResponseMessage.Content)
@@ -49,9 +51,11 @@ namespace Caelum.Restfulie
 
             if (uri != null)
             {
-                var latestHttpResponseMessage = _httpClient.Send(HttpMethod.GET, uri);
+                var httpMethod = _httpMethodDiscovery.MethodFor(binder.Name);
 
-                result = new Restfulie(_httpClient, _dynamicContentParserFactory)
+                var latestHttpResponseMessage = _httpClient.Send(httpMethod, uri);
+
+                result = new Restfulie(_httpClient, _dynamicContentParserFactory, _httpMethodDiscovery)
                 {
                     LatestHttpResponseMessage = latestHttpResponseMessage,
                     DynamicContentParser = _dynamicContentParserFactory.New(latestHttpResponseMessage.Content)

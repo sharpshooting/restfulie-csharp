@@ -47,6 +47,7 @@
     <Compile Include="DynamicXmlContentParser.cs" />
     <Compile Include="IDynamicContentParser.cs" />
     <Compile Include="IDynamicContentParserFactory.cs" />
+    <Compile Include="IHttpMethodDiscovery.cs" />
     <Compile Include="UnsupportedMediaTypeException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Restfulie.cs" />
