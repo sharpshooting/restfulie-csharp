@@ -17,11 +17,10 @@ namespace Caelum.Restfulie.Tests
         }
 
         [TestMethod]
-        public void ShouldReturnDeleteMethodForDeleteCancelOrDestroyVerbs()
+        public void ShouldReturnDeleteMethodForCancelDeleteOrDestroyVerbs()
         {
-            _httpMethodDiscovery.MethodFor("delete").ShouldBeEqualTo(HttpMethod.DELETE);
-
             _httpMethodDiscovery.MethodFor("cancel").ShouldBeEqualTo(HttpMethod.DELETE);
+            _httpMethodDiscovery.MethodFor("delete").ShouldBeEqualTo(HttpMethod.DELETE);
             _httpMethodDiscovery.MethodFor("destroy").ShouldBeEqualTo(HttpMethod.DELETE);
         }
 
@@ -34,27 +33,43 @@ namespace Caelum.Restfulie.Tests
         }
 
         [TestMethod]
-        public void ShouldReturnPostForPostOrUpdateVerbs()
+        public void ShouldReturnPutForUpdateVerbs()
         {
-            _httpMethodDiscovery.MethodFor("post").ShouldBeEqualTo(HttpMethod.POST);
-            _httpMethodDiscovery.MethodFor("update").ShouldBeEqualTo(HttpMethod.POST);
+            _httpMethodDiscovery.MethodFor("update").ShouldBeEqualTo(HttpMethod.PUT);
         }
 
         [TestMethod]
-        public void ShouldReturnGetForEverythingElse()
+        public void ShouldReturnGetForLatestRefreshReloadOrShowVerbs()
         {
-            _httpMethodDiscovery.MethodFor("delete").ShouldNotBeEqualTo(HttpMethod.GET);
-            _httpMethodDiscovery.MethodFor("post").ShouldNotBeEqualTo(HttpMethod.GET);
-
-            _httpMethodDiscovery.MethodFor("get").ShouldBeEqualTo(HttpMethod.GET);
-            _httpMethodDiscovery.MethodFor("ABC30C99-E79F-488C-8855-F9DB5D5E6C52").ShouldBeEqualTo(HttpMethod.GET);
+            _httpMethodDiscovery.MethodFor("latest").ShouldBeEqualTo(HttpMethod.GET);
+            _httpMethodDiscovery.MethodFor("refresh").ShouldBeEqualTo(HttpMethod.GET);
+            _httpMethodDiscovery.MethodFor("reload").ShouldBeEqualTo(HttpMethod.GET);
+            _httpMethodDiscovery.MethodFor("show").ShouldBeEqualTo(HttpMethod.GET);
         }
 
         [TestMethod]
-        public void ShouldReturnGetForNullOrEmptyVerb()
+        public void ShouldReturnPostForEverythingElse()
         {
-            _httpMethodDiscovery.MethodFor(null).ShouldBeEqualTo(HttpMethod.GET);
-            _httpMethodDiscovery.MethodFor(String.Empty).ShouldBeEqualTo(HttpMethod.GET);
+            _httpMethodDiscovery.MethodFor("cancel").ShouldNotBeEqualTo(HttpMethod.POST);
+            _httpMethodDiscovery.MethodFor("delete").ShouldNotBeEqualTo(HttpMethod.POST);
+            _httpMethodDiscovery.MethodFor("destroy").ShouldNotBeEqualTo(HttpMethod.POST);
+
+            _httpMethodDiscovery.MethodFor("update").ShouldNotBeEqualTo(HttpMethod.POST);
+
+            _httpMethodDiscovery.MethodFor("latest").ShouldNotBeEqualTo(HttpMethod.POST);
+            _httpMethodDiscovery.MethodFor("refresh").ShouldNotBeEqualTo(HttpMethod.POST);
+            _httpMethodDiscovery.MethodFor("reload").ShouldNotBeEqualTo(HttpMethod.POST);
+            _httpMethodDiscovery.MethodFor("show").ShouldNotBeEqualTo(HttpMethod.POST);
+
+            _httpMethodDiscovery.MethodFor("get").ShouldBeEqualTo(HttpMethod.POST);
+            _httpMethodDiscovery.MethodFor("ABC30C99-E79F-488C-8855-F9DB5D5E6C52").ShouldBeEqualTo(HttpMethod.POST);
+        }
+
+        [TestMethod]
+        public void ShouldReturnPostForNullOrEmptyVerb()
+        {
+            _httpMethodDiscovery.MethodFor(null).ShouldBeEqualTo(HttpMethod.POST);
+            _httpMethodDiscovery.MethodFor(String.Empty).ShouldBeEqualTo(HttpMethod.POST);
         }
     }
 }
