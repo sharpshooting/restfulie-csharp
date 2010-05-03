@@ -11,9 +11,19 @@ namespace SharpShooting.Tests
             Assert.AreEqual(expectedValue, actualValue);
         }
 
+        public static void ShouldNotBeEqualTo<T>(this T actualValue, T notExpectedValue)
+        {
+            Assert.AreNotEqual(notExpectedValue, actualValue);
+        }
+
         public static void ShouldBeEqualTo<T>(this IEnumerable<T> actualValue, IEnumerable<T> expectedValue)
         {
             actualValue.SequenceEqual(expectedValue);
+        }
+
+        public static void ShouldNotBeEqualTo<T>(this IEnumerable<T> actualValue, IEnumerable<T> notExpectedValue)
+        {
+            Assert.AreNotEqual(notExpectedValue, actualValue);
         }
 
         public static void ShouldBeNull<T>(this T actualValue) where T : class

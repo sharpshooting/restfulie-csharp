@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="DynamicContentParserFactory.cs" />
     <Compile Include="DynamicXmlContentParser.cs" />
+    <Compile Include="HttpMethodDiscovery.cs" />
     <Compile Include="IDynamicContentParser.cs" />
     <Compile Include="IDynamicContentParserFactory.cs" />
     <Compile Include="IHttpMethodDiscovery.cs" />
