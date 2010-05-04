@@ -16,7 +16,7 @@ namespace SharpShooting.Dynamic.Tests
         private const string XmlHeader = "<?xml version='1.0' encoding='UTF-8'?>\r\n";
 
         [TestMethod]
-        public void ShouldGetValueFromCurrentElement()
+        public void ShouldGetValueFromRootElement()
         {
             const string xml = XmlHeader + "<a>value</a>";
 
@@ -26,7 +26,7 @@ namespace SharpShooting.Dynamic.Tests
         }
 
         [TestMethod]
-        public void ShouldGetValueFromCurrentEmptyElement()
+        public void ShouldGetValueFromRootEmptyElement()
         {
             const string xml = XmlHeader + "<a></a>";
 
@@ -36,7 +36,7 @@ namespace SharpShooting.Dynamic.Tests
         }
 
         [TestMethod]
-        public void ShouldGetValueFromCurrentNullElement()
+        public void ShouldGetValueFromRootNullElement()
         {
             // carlos.mendonca: I was inclined to set that <a></a> == string.Empty, <a/> == null and inexistent
             //                  element throws RuntimeBinderException on TryGetMember method, but .NET's
@@ -49,7 +49,7 @@ namespace SharpShooting.Dynamic.Tests
         }
 
         [TestMethod]
-        public void ShouldGetValueFromCurrentElementWithDescendants()
+        public void ShouldGetValueFromRootElementWithDescendants()
         {
             // carlos.mendonca: This seens to be a .NET System.Linq.Xml convention: nested elements get
             //                  concatenated when you call the root element's value.
@@ -165,7 +165,7 @@ namespace SharpShooting.Dynamic.Tests
         public void ShouldQueryMultipleFirstLevelElements()
         {
             // TODO: carlos.mendonca: fix this implementation; maybe use http://jrwren.wrenfam.com/blog/2010/03/04/linq-abuse-with-the-c-4-dynamic-type/
-            
+
             //const string xml =
             //    XmlHeader +
             //    "<order><book><title>Pragmatic Project Automation</title></book><book><title>Coders at Work</title></book></order>";
@@ -202,12 +202,12 @@ namespace SharpShooting.Dynamic.Tests
 
             Assert.AreEqual("valueB1valueB2valueCvalueF", dynamicObject.ToString());
 
-            Assert.AreEqual("valueB1",    dynamicObject.Element("b", "http://www.w3.org/2005/Atom")[0]);
-            Assert.AreEqual("valueB2",    dynamicObject.Element("b", "http://www.w3.org/2005/Atom")[1]);
-            Assert.AreEqual("valueC",     dynamicObject.Element("c", "http://www.w3.org/2005/Atom"));
+            Assert.AreEqual("valueB1", dynamicObject.Element("b", "http://www.w3.org/2005/Atom")[0]);
+            Assert.AreEqual("valueB2", dynamicObject.Element("b", "http://www.w3.org/2005/Atom")[1]);
+            Assert.AreEqual("valueC", dynamicObject.Element("c", "http://www.w3.org/2005/Atom"));
             Assert.AreEqual(string.Empty, dynamicObject.Element("d", "http://www.w3.org/2005/Atom"));
             Assert.AreEqual(string.Empty, dynamicObject.Element("e", "http://www.w3.org/2005/Atom"));
-            
+
             Assert.AreEqual("valueF", dynamicObject.f);
         }
 
@@ -220,12 +220,12 @@ namespace SharpShooting.Dynamic.Tests
 
             Assert.AreEqual("valueC1valueC2", dynamicObject.Element("b", "http://www.w3.org/2005/Atom").Element("c", "http://www.w3.org/2005/Atom").ToString());
 
-            Assert.AreEqual("valueC1",    dynamicObject.Element("b", "http://www.w3.org/2005/Atom").Element("c", "http://www.w3.org/2005/Atom")[0]);
-            Assert.AreEqual("valueC2",    dynamicObject.Element("b", "http://www.w3.org/2005/Atom").Element("c", "http://www.w3.org/2005/Atom")[1]);
-            Assert.AreEqual("valueD",     dynamicObject.Element("b", "http://www.w3.org/2005/Atom").Element("d", "http://www.w3.org/2005/Atom"));
+            Assert.AreEqual("valueC1", dynamicObject.Element("b", "http://www.w3.org/2005/Atom").Element("c", "http://www.w3.org/2005/Atom")[0]);
+            Assert.AreEqual("valueC2", dynamicObject.Element("b", "http://www.w3.org/2005/Atom").Element("c", "http://www.w3.org/2005/Atom")[1]);
+            Assert.AreEqual("valueD", dynamicObject.Element("b", "http://www.w3.org/2005/Atom").Element("d", "http://www.w3.org/2005/Atom"));
             Assert.AreEqual(string.Empty, dynamicObject.Element("b", "http://www.w3.org/2005/Atom").Element("e", "http://www.w3.org/2005/Atom"));
             Assert.AreEqual(string.Empty, dynamicObject.Element("b", "http://www.w3.org/2005/Atom").Element("f", "http://www.w3.org/2005/Atom"));
-            
+
             Assert.AreEqual("valueG", dynamicObject.Element("b", "http://www.w3.org/2005/Atom").g);
         }
 
@@ -246,7 +246,7 @@ namespace SharpShooting.Dynamic.Tests
             Assert.AreEqual(string.Empty, dynamicObject.b.ToString());
 
             Assert.AreEqual("attributeValueB1", dynamicObject.b.Attribute("attribute1"));
-            Assert.AreEqual(string.Empty,      dynamicObject.b.Attribute("attribute2"));
+            Assert.AreEqual(string.Empty, dynamicObject.b.Attribute("attribute2"));
             Assert.IsNull(dynamicObject.b.Attribute("attribute3"));
         }
 
@@ -255,7 +255,7 @@ namespace SharpShooting.Dynamic.Tests
         {
             // TODO: carlos.mendonca: write this test!
         }
-        
+
         [TestMethod, Ignore]
         public void ShouldThrowArgumentExceptionIfElementMethodIsCalledWithWrongSignature()
         {
@@ -266,6 +266,50 @@ namespace SharpShooting.Dynamic.Tests
         public void ShouldThrowArgumentExceptionIfAttributeMethodIsCalledWithWrongSignature()
         {
             // TODO: carlos.mendonca: write this test!
+        }
+
+        [TestMethod, Ignore]
+        public void ShouldSetValueToRootElement()
+        {
+            // carlos.mendonca: not sure if I should introduce the reserved member "Root" or not.
+            const string xml = XmlHeader + "<a>before</a>";
+
+            dynamic dynamicObject = new DynamicXmlObject(xml);
+            dynamicObject.Root = "after";
+
+            Assert.AreEqual("after", dynamicObject.Root);
+        }
+
+        [TestMethod]
+        public void ShouldSetValueToFirstLevelUniqueElement()
+        {
+            const string xml = XmlHeader + "<a><b>beforeB1</b><b>beforeB2</b><c>beforeC</c><d></d><e/></a>";
+
+            dynamic dynamicObject = new DynamicXmlObject(xml);
+
+            dynamicObject.c = "afterC";
+
+            dynamicObject.d = "afterD";
+
+            dynamicObject.e = "afterE";
+
+            Assert.AreEqual("afterC", dynamicObject.c);
+            Assert.AreEqual("afterD", dynamicObject.d);
+            Assert.AreEqual("afterE", dynamicObject.e);
+        }
+
+        [TestMethod, Ignore]
+        public void ShouldSetValueToFirstLevelDuplicatedElement()
+        {
+            const string xml = XmlHeader + "<a><b>beforeB1</b><b>beforeB2</b><c>beforeC</c><d></d><e/></a>";
+
+            dynamic dynamicObject = new DynamicXmlObject(xml);
+
+            dynamicObject.b[0] = "afterB1";
+            dynamicObject.b[1] = "afterB2";
+
+            Assert.AreEqual("afterB1", dynamicObject.b[0]);
+            Assert.AreEqual("afterB2", dynamicObject.b[1]);
         }
     }
 }

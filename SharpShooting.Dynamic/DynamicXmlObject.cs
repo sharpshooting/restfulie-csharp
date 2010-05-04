@@ -12,7 +12,7 @@ namespace SharpShooting.Dynamic
 
         private readonly XElement _xElement;
         protected XElement XElement { get { return _xElement; } }
-        
+
         private readonly TryGetMemberBehavior _tryGetMemberBehavior;
 
         public DynamicXmlObject(string xml, TryGetMemberBehavior tryGetMemberBehavior = TryGetMemberBehavior.Loose)
@@ -35,7 +35,7 @@ namespace SharpShooting.Dynamic
 
             return _tryGetMemberBehavior != TryGetMemberBehavior.Strict || result != null;
         }
-        
+
         private object ResolveElement(string localName, string namespaceName = "")
         {
             object result;
@@ -66,6 +66,7 @@ namespace SharpShooting.Dynamic
             if (XElement.Elements().Count() > index)
                 result = XElement.Elements().ElementAt(index).Value;
             else
+                // TODO: carlos.mendonca: I forgot to consider Loose/Strict behavior.
                 result = null;
 
             return true;
@@ -96,6 +97,35 @@ namespace SharpShooting.Dynamic
             }
 
             return false;
+        }
+
+        public override bool TrySetMember(SetMemberBinder binder, object value)
+        {
+            var xElements = XElement.Elements(binder.Name);
+
+            if (xElements.Count() == 1)
+            {
+                var xElement = xElements.Single();
+
+                if (xElement.HasElements || xElement.HasAttributes)
+                    throw new NotImplementedException();
+                else
+                    xElement.Value = (string)value;
+            }
+            else
+                throw new NotImplementedException();
+
+            return true;
+        }
+
+        public override bool TrySetIndex(SetIndexBinder binder, object[] indexes, object value)
+        {
+            var index = (int)indexes[0];
+
+            if (XElement.Elements().Count() > index)
+                XElement.Elements().ElementAt(index).Value = (string)value;
+
+            return true;
         }
 
         public IEnumerator GetEnumerator()
