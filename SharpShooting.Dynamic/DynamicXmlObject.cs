@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
 using System.Xml.Linq;
@@ -8,68 +9,42 @@ namespace SharpShooting.Dynamic
 {
     public class DynamicXmlObject : DynamicObject, IEnumerable
     {
-        public enum TryGetMemberBehavior { Loose, Strict }
+        private readonly bool _shouldBypassRootElement;
+        private readonly bool _shouldThrowOnInexistentElement;
 
-        private readonly XElement _xElement;
-        protected XElement XElement { get { return _xElement; } }
-
-        private readonly TryGetMemberBehavior _tryGetMemberBehavior;
-
-        public DynamicXmlObject(string xml, TryGetMemberBehavior tryGetMemberBehavior = TryGetMemberBehavior.Loose)
+        private readonly IEnumerable<XElement> _xElements;
+        
+        public DynamicXmlObject(string xml, bool shouldBypassRootElement = true, bool shouldThrowOnInexistentElement = false)
         {
-            _xElement = XDocument.Parse(xml).Root;
-            _tryGetMemberBehavior = tryGetMemberBehavior;
+            _xElements = new[] { XDocument.Parse(xml).Root };
+            _shouldBypassRootElement = shouldBypassRootElement;
+            _shouldThrowOnInexistentElement = shouldThrowOnInexistentElement;
         }
 
-        public DynamicXmlObject(XElement xElement, TryGetMemberBehavior tryGetMemberBehavior = TryGetMemberBehavior.Loose)
+        private DynamicXmlObject(XElement xElement, bool shouldBypassRootElement, bool shouldThrowOnInexistentElement)
+            : this(new[] { xElement }, shouldBypassRootElement, shouldThrowOnInexistentElement)
         {
-            _xElement = xElement;
-            _tryGetMemberBehavior = tryGetMemberBehavior;
+        }
+
+        private DynamicXmlObject(IEnumerable<XElement> xElements, bool shouldBypassRootElement, bool shouldThrowOnInexistentElement)
+        {
+            _xElements = xElements;
+            _shouldBypassRootElement = shouldBypassRootElement;
+            _shouldThrowOnInexistentElement = shouldThrowOnInexistentElement;
         }
 
         public override bool TryGetMember(GetMemberBinder binder, out object result)
         {
-            var memberName = binder.Name;
+            result = ResolveElement(binder.Name);
 
-            result = ResolveElement(memberName);
-
-            return _tryGetMemberBehavior != TryGetMemberBehavior.Strict || result != null;
-        }
-
-        private object ResolveElement(string localName, string namespaceName = "")
-        {
-            object result;
-
-            var xElements = XElement.Elements(XName.Get(localName, namespaceName));
-
-            if (xElements.Count() == 1)
-            {
-                var xElement = xElements.Single();
-
-                if (xElement.HasElements || xElement.HasAttributes)
-                    result = new DynamicXmlObject(xElement);
-                else
-                    result = xElement.Value;
-            }
-            else if (xElements.Count() > 1)
-                result = new DynamicXmlObject(new XElement(XElement.Name, xElements));
-            else
-                result = null;
-
-            return result;
+            return ResolveResult(result);
         }
 
         public override bool TryGetIndex(GetIndexBinder binder, object[] indexes, out object result)
         {
-            var index = (int)indexes[0];
+            result = ResolveElementAtIndex((int)indexes[0]);
 
-            if (XElement.Elements().Count() > index)
-                result = XElement.Elements().ElementAt(index).Value;
-            else
-                // TODO: carlos.mendonca: I forgot to consider Loose/Strict behavior.
-                result = null;
-
-            return true;
+            return ResolveResult(result);
         }
 
         public override bool TryInvokeMember(InvokeMemberBinder binder, object[] args, out object result)
@@ -82,7 +57,8 @@ namespace SharpShooting.Dynamic
                     throw new ArgumentException("Method Element takes two string parameters.");
 
                 result = ResolveElement((string)args[0], (string)args[1]);
-                return _tryGetMemberBehavior != TryGetMemberBehavior.Strict || result != null;
+
+                return ResolveResult(result);
             }
 
             if (binder.Name.Equals("attribute", StringComparison.InvariantCultureIgnoreCase))
@@ -90,53 +66,121 @@ namespace SharpShooting.Dynamic
                 if (args.Length != 1 && !(args[0] is string))
                     throw new ArgumentException("Method Attribute takes one string parameter.");
 
-                var xAttribute = XElement.Attribute((string)args[0]);
-                if (xAttribute != null)
-                    result = xAttribute.Value;
-                return _tryGetMemberBehavior != TryGetMemberBehavior.Strict || result != null;
+                var xElementsToResolve = _shouldBypassRootElement ? _xElements.Elements() : _xElements;
+
+                if (xElementsToResolve.Count() == 1)
+                {
+                    var xAttribute = _xElements.First().Attribute((string)args[0]);
+
+                    if (xAttribute != null)
+                        result = xAttribute.Value;
+                }
+
+                return ResolveResult(result);
             }
 
             return false;
         }
 
+        private bool ResolveResult(object result)
+        {
+            return !_shouldThrowOnInexistentElement || result != null;
+        }
+
+        private object ResolveElement(string localName, string namespaceName = "")
+        {
+            var xName = XName.Get(localName, namespaceName);
+
+            //if (IsAtRootElement && !_shouldBypassRootElement)
+            //    return new DynamicXmlObject(_xElements, true, _shouldThrowOnInexistentElement);
+
+            //var xElementsToResolve = IsAtRootElement ? _xElements.Elements(xName) : _xElements.Where(it => it.Name == xName);
+            
+            var xElementsToResolve = _shouldBypassRootElement ? _xElements.Elements(xName) : _xElements.Where(it => it.Name == xName);
+
+            if (xElementsToResolve.Count() == 1)
+            {
+                var xElement = xElementsToResolve.Single();
+
+                if (xElement.HasAttributes)
+                    return new DynamicXmlObject(xElement, false, _shouldThrowOnInexistentElement);
+                
+                if (xElement.HasElements)
+                    return new DynamicXmlObject(xElement, true, _shouldThrowOnInexistentElement);
+
+                return xElement.Value;
+            }
+
+            if (xElementsToResolve.Count() > 1)
+                return new DynamicXmlObject(xElementsToResolve, false, _shouldThrowOnInexistentElement);
+
+            return null;
+        }
+
+        private object ResolveElementAtIndex(int index)
+        {
+            var xElementsToResolve = _shouldBypassRootElement ? _xElements.Elements() : _xElements;
+
+            if (xElementsToResolve.Count() > index)
+            {
+                var xElement = xElementsToResolve.ElementAt(index);
+
+                if (xElement.HasAttributes)
+                    return new DynamicXmlObject(xElement, false, _shouldThrowOnInexistentElement);
+
+                if (xElement.HasElements)
+                    return new DynamicXmlObject(xElement, true, _shouldThrowOnInexistentElement);
+
+                return xElement.Value;
+            }
+
+            return null;
+        }
+
         public override bool TrySetMember(SetMemberBinder binder, object value)
         {
-            var xElements = XElement.Elements(binder.Name);
+            throw new NotImplementedException();
 
-            if (xElements.Count() == 1)
-            {
-                var xElement = xElements.Single();
+            //var xElements = XElement.Elements(binder.Name);
 
-                if (xElement.HasElements || xElement.HasAttributes)
-                    throw new NotImplementedException();
-                else
-                    xElement.Value = (string)value;
-            }
-            else
-                throw new NotImplementedException();
+            //if (xElements.Count() == 1)
+            //{
+            //    var xElement = xElements.Single();
 
-            return true;
+            //    if (xElement.HasElements || xElement.HasAttributes)
+            //        throw new NotImplementedException();
+            //    else
+            //        xElement.Value = (string)value;
+            //}
+            //else
+            //    throw new NotImplementedException();
+
+            //return true;
         }
 
         public override bool TrySetIndex(SetIndexBinder binder, object[] indexes, object value)
         {
-            var index = (int)indexes[0];
+            //var index = (int)indexes[0];
 
-            if (XElement.Elements().Count() > index)
-                XElement.Elements().ElementAt(index).Value = (string)value;
+            //if (XElement.Elements().Count() > index)
+            //    XElement.Elements().ElementAt(index).Value = (string)value;
 
-            return true;
+            //return true;
+
+            throw new NotImplementedException();
         }
 
         public IEnumerator GetEnumerator()
         {
             // carlos.mendonca: believe it or not, this is equivalent to a yield return.
-            return XElement.Elements().Select(xElement => xElement.Value).GetEnumerator();
+            //return XElements.Elements().Select(xElement => xElement.Value).GetEnumerator();
+
+            throw new NotImplementedException();
         }
 
         public override string ToString()
         {
-            return XElement.Value;
+            return _xElements.Single().Value;
         }
     }
 }
