@@ -4,7 +4,7 @@ using Microsoft.Http;
 
 namespace Caelum.Restfulie
 {
-    public class HttpMethodDiscovery : IHttpMethodDiscovery
+    public class HttpMethodDiscoverer : IHttpMethodDiscoverer
     {
         private readonly IDictionary<string, HttpMethod> _httpMethodLookupDictionary = new Dictionary<string, HttpMethod>(StringComparer.InvariantCultureIgnoreCase)
         {

@@ -56,9 +56,11 @@
   <ItemGroup>
     <Compile Include="DynamicContentParserFactoryTests.cs" />
     <Compile Include="DynamicXmlContentParserTests.cs" />
-    <Compile Include="HttpMethodDiscoveryTest.cs" />
+    <Compile Include="HttpMethodDiscovererTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RestfulieTests.cs" />
+    <Compile Include="RestfulieProxyFactoryTests.cs" />
+    <Compile Include="RestfulieProxyTests.cs" />
+    <Compile Include="TestHelpers.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Caelum.Restfulie\Caelum.Restfulie.csproj">

@@ -6,7 +6,7 @@ using Microsoft.Http;
 
 namespace Caelum.Restfulie
 {
-    public interface IHttpMethodDiscovery
+    public interface IHttpMethodDiscoverer
     {
         HttpMethod MethodFor(string rel);
     }

@@ -45,13 +45,16 @@
   <ItemGroup>
     <Compile Include="DynamicContentParserFactory.cs" />
     <Compile Include="DynamicXmlContentParser.cs" />
-    <Compile Include="HttpMethodDiscovery.cs" />
+    <Compile Include="HttpMethodDiscoverer.cs" />
     <Compile Include="IDynamicContentParser.cs" />
     <Compile Include="IDynamicContentParserFactory.cs" />
-    <Compile Include="IHttpMethodDiscovery.cs" />
+    <Compile Include="IHttpMethodDiscoverer.cs" />
+    <Compile Include="IRestfulieProxyFactory.cs" />
+    <Compile Include="Restfulie.cs" />
+    <Compile Include="RestfulieProxyFactory.cs" />
     <Compile Include="UnsupportedMediaTypeException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Restfulie.cs" />
+    <Compile Include="RestfulieProxy.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SharpShooting.Dynamic\SharpShooting.Dynamic.csproj">
