@@ -13,7 +13,7 @@ namespace SharpShooting.Dynamic
         private readonly bool _shouldThrowOnInexistentElement;
 
         private readonly IEnumerable<XElement> _xElements;
-        
+
         public DynamicXmlObject(string xml, bool shouldBypassRootElement = true, bool shouldThrowOnInexistentElement = false)
         {
             _xElements = new[] { XDocument.Parse(xml).Root };
@@ -126,35 +126,26 @@ namespace SharpShooting.Dynamic
 
         public override bool TrySetMember(SetMemberBinder binder, object value)
         {
-            throw new NotImplementedException();
+            var xName = XName.Get(binder.Name);
+            var xElementsToResolve = _shouldBypassRootElement ? _xElements.Elements(xName) : _xElements.Where(it => it.Name == xName);
 
-            //var xElements = XElement.Elements(binder.Name);
+            if (xElementsToResolve.Count() == 1)
+            {
+                xElementsToResolve.Single().Value = (string)value;
+            }
 
-            //if (xElements.Count() == 1)
-            //{
-            //    var xElement = xElements.Single();
-
-            //    if (xElement.HasElements || xElement.HasAttributes)
-            //        throw new NotImplementedException();
-            //    else
-            //        xElement.Value = (string)value;
-            //}
-            //else
-            //    throw new NotImplementedException();
-
-            //return true;
+            return true;
         }
 
         public override bool TrySetIndex(SetIndexBinder binder, object[] indexes, object value)
         {
-            //var index = (int)indexes[0];
+            var index = (int)indexes[0];
 
-            //if (XElement.Elements().Count() > index)
-            //    XElement.Elements().ElementAt(index).Value = (string)value;
+            var xElementsToResolve = _shouldBypassRootElement ? _xElements.Elements() : _xElements;
 
-            //return true;
+            xElementsToResolve.ElementAt(index).Value = (string) value;
 
-            throw new NotImplementedException();
+            return true;
         }
 
         public IEnumerator GetEnumerator()

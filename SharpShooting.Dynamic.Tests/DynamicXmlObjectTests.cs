@@ -316,7 +316,7 @@ namespace SharpShooting.Dynamic.Tests
         }
 
         [TestMethod]
-        public void ShouldGetValueFromAttributeIfItExistsByNotBypassingRootElement()
+        public void ShouldGetValueFromAttributeIfItExistsNotBypassingRootElement()
         {
             const string xml = XmlHeader + "<a attribute='attributeValueA'><b attribute1='attributeValueB1' attribute2=''/><c attribute='attributeValueC'><cc/></c><d attribute='attributeValueD'><dd/><dd/></d><e attribute='attributeValueE1'/><e attribute='attributeValueE2'/></a>";
 
@@ -360,48 +360,53 @@ namespace SharpShooting.Dynamic.Tests
             // TODO: carlos.mendonca: write this test!
         }
 
-        //[TestMethod, Ignore]
-        //public void ShouldSetValueToRootElement()
-        //{
-        //    // carlos.mendonca: not sure if I should introduce the reserved member "Root" or not.
-        //    const string xml = XmlHeader + "<a>before</a>";
+        [TestMethod]
+        public void ShouldSetValueToRootElement()
+        {
+            const string xml = XmlHeader + "<a>before</a>";
 
-        //    dynamic dynamicObject = new DynamicXmlObject(xml);
-        //    dynamicObject.Root = "after";
+            dynamic dynamicObject = new DynamicXmlObject(xml, false);
+            dynamicObject.a = "after";
 
-        //    Assert.AreEqual("after", dynamicObject.Root);
-        //}
+            Assert.AreEqual("after", dynamicObject.a);
+        }
 
-        //[TestMethod]
-        //public void ShouldSetValueToFirstLevelUniqueElement()
-        //{
-        //    const string xml = XmlHeader + "<a><b>beforeB1</b><b>beforeB2</b><c>beforeC</c><d></d><e/></a>";
+        [TestMethod]
+        public void ShouldSetValueToFirstLevelElements()
+        {
+            const string xml = XmlHeader + "<a><b>beforeB0</b><b>beforeB1</b><c>beforeC</c><d></d><e/></a>";
 
-        //    dynamic dynamicObject = new DynamicXmlObject(xml);
+            dynamic dynamicObject = new DynamicXmlObject(xml);
+            dynamicObject.b[0] = "afterB0";
+            dynamicObject.b[1] = "afterB1";
+            dynamicObject.c = "afterC";
+            dynamicObject.d = "afterD";
+            dynamicObject.e = "afterE";
 
-        //    dynamicObject.c = "afterC";
+            Assert.AreEqual("afterB0", dynamicObject.b[0]);
+            Assert.AreEqual("afterB1", dynamicObject.b[1]);
+            Assert.AreEqual("afterC", dynamicObject.c);
+            Assert.AreEqual("afterD", dynamicObject.d);
+            Assert.AreEqual("afterE", dynamicObject.e);
+        }
 
-        //    dynamicObject.d = "afterD";
+        [TestMethod]
+        public void ShouldSetValueToFirstLevelElementsNotBypassingRootElement()
+        {
+            const string xml = XmlHeader + "<a><b>beforeB0</b><b>beforeB1</b><c>beforeC</c><d></d><e/></a>";
 
-        //    dynamicObject.e = "afterE";
+            dynamic dynamicObject = new DynamicXmlObject(xml, false);
+            dynamicObject.a.b[0] = "afterB0";
+            dynamicObject.a.b[1] = "afterB1";
+            dynamicObject.a.c = "afterC";
+            dynamicObject.a.d = "afterD";
+            dynamicObject.a.e = "afterE";
 
-        //    Assert.AreEqual("afterC", dynamicObject.c);
-        //    Assert.AreEqual("afterD", dynamicObject.d);
-        //    Assert.AreEqual("afterE", dynamicObject.e);
-        //}
-
-        //[TestMethod, Ignore]
-        //public void ShouldSetValueToFirstLevelDuplicatedElement()
-        //{
-        //    const string xml = XmlHeader + "<a><b>beforeB1</b><b>beforeB2</b><c>beforeC</c><d></d><e/></a>";
-
-        //    dynamic dynamicObject = new DynamicXmlObject(xml);
-
-        //    dynamicObject.b[0] = "afterB1";
-        //    dynamicObject.b[1] = "afterB2";
-
-        //    Assert.AreEqual("afterB1", dynamicObject.b[0]);
-        //    Assert.AreEqual("afterB2", dynamicObject.b[1]);
-        //}
+            Assert.AreEqual("afterB0", dynamicObject.a.b[0]);
+            Assert.AreEqual("afterB1", dynamicObject.a.b[1]);
+            Assert.AreEqual("afterC", dynamicObject.a.c);
+            Assert.AreEqual("afterD", dynamicObject.a.d);
+            Assert.AreEqual("afterE", dynamicObject.a.e);
+        }
     }
 }
