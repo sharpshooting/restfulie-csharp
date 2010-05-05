@@ -10,9 +10,12 @@ namespace SharpShooting.Dynamic
     public class DynamicXmlObject : DynamicObject, IEnumerable
     {
         private readonly bool _shouldBypassRootElement;
+        protected bool ShouldBypassRootElement { get { return _shouldBypassRootElement; } }
+
         private readonly bool _shouldThrowOnInexistentElement;
 
         private readonly IEnumerable<XElement> _xElements;
+        protected IEnumerable<XElement> XElements { get { return _xElements; } }
 
         public DynamicXmlObject(string xml, bool shouldBypassRootElement = true, bool shouldThrowOnInexistentElement = false)
         {
@@ -66,9 +69,9 @@ namespace SharpShooting.Dynamic
                 if (args.Length != 1 && !(args[0] is string))
                     throw new ArgumentException("Method Attribute takes one string parameter.");
 
-                if (_xElements.Count() == 1)
+                if (XElements.Count() == 1)
                 {
-                    var xAttribute = _xElements.Single().Attribute((string)args[0]);
+                    var xAttribute = XElements.Single().Attribute((string)args[0]);
 
                     if (xAttribute != null)
                         result = xAttribute.Value;
@@ -89,7 +92,7 @@ namespace SharpShooting.Dynamic
         {
             var xName = XName.Get(localName, namespaceName);
 
-            var xElementsToResolve = _shouldBypassRootElement ? _xElements.Elements(xName) : _xElements.Where(it => it.Name == xName);
+            var xElementsToResolve = ShouldBypassRootElement ? XElements.Elements(xName) : XElements.Where(it => it.Name == xName);
 
             if (xElementsToResolve.Count() == 1)
             {
@@ -109,7 +112,7 @@ namespace SharpShooting.Dynamic
 
         private object ResolveElementAtIndex(int index)
         {
-            var xElementsToResolve = _shouldBypassRootElement ? _xElements.Elements() : _xElements;
+            var xElementsToResolve = ShouldBypassRootElement ? XElements.Elements() : XElements;
 
             if (xElementsToResolve.Count() > index)
             {
@@ -127,7 +130,7 @@ namespace SharpShooting.Dynamic
         public override bool TrySetMember(SetMemberBinder binder, object value)
         {
             var xName = XName.Get(binder.Name);
-            var xElementsToResolve = _shouldBypassRootElement ? _xElements.Elements(xName) : _xElements.Where(it => it.Name == xName);
+            var xElementsToResolve = ShouldBypassRootElement ? XElements.Elements(xName) : XElements.Where(it => it.Name == xName);
 
             if (xElementsToResolve.Count() == 1)
             {
@@ -141,7 +144,7 @@ namespace SharpShooting.Dynamic
         {
             var index = (int)indexes[0];
 
-            var xElementsToResolve = _shouldBypassRootElement ? _xElements.Elements() : _xElements;
+            var xElementsToResolve = ShouldBypassRootElement ? XElements.Elements() : XElements;
 
             xElementsToResolve.ElementAt(index).Value = (string) value;
 
@@ -158,7 +161,7 @@ namespace SharpShooting.Dynamic
 
         public override string ToString()
         {
-            return _xElements.Single().Value;
+            return XElements.Single().Value;
         }
     }
 }

@@ -14,7 +14,7 @@ namespace Caelum.Restfulie.Tests
         {
             const string xml = XmlHeader + "<order><atom:link rel='refresh' href='http://localhost/orders/1' xmlns:atom='http://www.w3.org/2005/Atom'/></order>";
 
-            var uri = new Caelum.Restfulie.DynamicXmlContentParser(xml).UriFor("refresh");
+            var uri = new DynamicXmlContentParser(xml).UriFor("refresh");
 
             uri.ShouldBeEqualTo(new Uri("http://localhost/orders/1"));
         }
@@ -24,7 +24,7 @@ namespace Caelum.Restfulie.Tests
         {
             const string xml = XmlHeader + "<order></order>";
 
-            var uri = new Caelum.Restfulie.DynamicXmlContentParser(xml).UriFor("refresh");
+            var uri = new DynamicXmlContentParser(xml).UriFor("refresh");
 
             uri.ShouldBeNull();
         }
@@ -34,7 +34,7 @@ namespace Caelum.Restfulie.Tests
         {
             const string xml = XmlHeader + "<order><atom:link href='http://localhost/orders/1' xmlns:atom='http://www.w3.org/2005/Atom'/></order>";
 
-            var uri = new Caelum.Restfulie.DynamicXmlContentParser(xml).UriFor("refresh");
+            var uri = new DynamicXmlContentParser(xml).UriFor("refresh");
 
             uri.ShouldBeNull();
         }
@@ -44,7 +44,7 @@ namespace Caelum.Restfulie.Tests
         {
             const string xml = XmlHeader + "<order><atom:link rel='refresh' xmlns:atom='http://www.w3.org/2005/Atom'/></order>";
 
-            var uri = new Caelum.Restfulie.DynamicXmlContentParser(xml).UriFor("refresh");
+            var uri = new DynamicXmlContentParser(xml).UriFor("refresh");
 
             uri.ShouldBeNull();
         }
@@ -54,7 +54,7 @@ namespace Caelum.Restfulie.Tests
         {
             const string xml = XmlHeader + "<order><atom:link rel='refresh' href='' xmlns:atom='http://www.w3.org/2005/Atom'/></order>";
 
-            var uri = new Caelum.Restfulie.DynamicXmlContentParser(xml).UriFor("refresh");
+            var uri = new DynamicXmlContentParser(xml).UriFor("refresh");
 
             uri.ShouldBeNull();
         }
@@ -64,7 +64,7 @@ namespace Caelum.Restfulie.Tests
         {
             const string xml = XmlHeader + "<order><atom:link rel='refresh' href='http://localhost/orders/1' xmlns:atom='http://www.w3.org/2005/Atom'/><atom:link rel='refresh' href='http://localhost/orders/2' xmlns:atom='http://www.w3.org/2005/Atom'/></order>";
 
-            var uri = new Caelum.Restfulie.DynamicXmlContentParser(xml).UriFor("refresh");
+            var uri = new DynamicXmlContentParser(xml).UriFor("refresh");
 
             uri.ShouldBeEqualTo(new Uri("http://localhost/orders/1"));
         }

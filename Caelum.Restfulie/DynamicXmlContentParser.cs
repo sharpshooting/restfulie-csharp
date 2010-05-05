@@ -14,7 +14,10 @@ namespace Caelum.Restfulie
 
         public Uri UriFor(string stateTransition)
         {
-            var xElement = (from element in XElement.Elements(XName.Get("link", "http://www.w3.org/2005/Atom"))
+            var xElementsToResolve = ShouldBypassRootElement ? XElements.Elements() : XElements;
+
+            var xElement = (from element in xElementsToResolve
+                            where element.Name == XName.Get("link", "http://www.w3.org/2005/Atom")
                             from attribute in element.Attributes("rel")
                             where attribute.Value == stateTransition && element.Attribute("href") != null
                             select element).FirstOrDefault();
