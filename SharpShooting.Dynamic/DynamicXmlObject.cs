@@ -66,11 +66,9 @@ namespace SharpShooting.Dynamic
                 if (args.Length != 1 && !(args[0] is string))
                     throw new ArgumentException("Method Attribute takes one string parameter.");
 
-                var xElementsToResolve = _shouldBypassRootElement ? _xElements.Elements() : _xElements;
-
-                if (xElementsToResolve.Count() == 1)
+                if (_xElements.Count() == 1)
                 {
-                    var xAttribute = _xElements.First().Attribute((string)args[0]);
+                    var xAttribute = _xElements.Single().Attribute((string)args[0]);
 
                     if (xAttribute != null)
                         result = xAttribute.Value;
@@ -91,21 +89,13 @@ namespace SharpShooting.Dynamic
         {
             var xName = XName.Get(localName, namespaceName);
 
-            //if (IsAtRootElement && !_shouldBypassRootElement)
-            //    return new DynamicXmlObject(_xElements, true, _shouldThrowOnInexistentElement);
-
-            //var xElementsToResolve = IsAtRootElement ? _xElements.Elements(xName) : _xElements.Where(it => it.Name == xName);
-            
             var xElementsToResolve = _shouldBypassRootElement ? _xElements.Elements(xName) : _xElements.Where(it => it.Name == xName);
 
             if (xElementsToResolve.Count() == 1)
             {
                 var xElement = xElementsToResolve.Single();
 
-                if (xElement.HasAttributes)
-                    return new DynamicXmlObject(xElement, false, _shouldThrowOnInexistentElement);
-                
-                if (xElement.HasElements)
+                if (xElement.HasAttributes || xElement.HasElements)
                     return new DynamicXmlObject(xElement, true, _shouldThrowOnInexistentElement);
 
                 return xElement.Value;
@@ -125,10 +115,7 @@ namespace SharpShooting.Dynamic
             {
                 var xElement = xElementsToResolve.ElementAt(index);
 
-                if (xElement.HasAttributes)
-                    return new DynamicXmlObject(xElement, false, _shouldThrowOnInexistentElement);
-
-                if (xElement.HasElements)
+                if (xElement.HasAttributes || xElement.HasElements)
                     return new DynamicXmlObject(xElement, true, _shouldThrowOnInexistentElement);
 
                 return xElement.Value;

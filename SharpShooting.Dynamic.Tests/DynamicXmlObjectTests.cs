@@ -290,16 +290,18 @@ namespace SharpShooting.Dynamic.Tests
         [TestMethod]
         public void ShouldGetValueFromAttributeIfItExists()
         {
-            // carlos.mendonca: this test introduces a new rule: if the element has an attribute, even if it has
-            //                  no children elements, it has to return DynamicXmlObject so that we can access
-            //                  the attributes. The element's value can only be accessed with the ToString
-            //                  method.
+            // carlos.mendonca: this test introduces the following rule: if the element has an attribute, even
+            //                  if it has no children elements, it has to return DynamicXmlObject so that we can
+            //                  access the attributes. The element's value can only be accessed with the
+            //                  ToString method.
 
             // carlos.mendonca: System.Xml.Linq.XElement does not support an element with two duplicate
             //                  attributes.
-            const string xml = XmlHeader + "<a><b attribute1='attributeValueB1' attribute2=''/><c attribute='attributeValueC'><cc/></c><d attribute='attributeValueD'><dd/><dd/></d><e attribute='attributeValueE1'/><e attribute='attributeValueE2'/></a>";
+            const string xml = XmlHeader + "<a attribute='attributeValueA'><b attribute1='attributeValueB1' attribute2=''/><c attribute='attributeValueC'><cc/></c><d attribute='attributeValueD'><dd/><dd/></d><e attribute='attributeValueE1'/><e attribute='attributeValueE2'/></a>";
 
             dynamic dynamicObject = new DynamicXmlObject(xml);
+
+            Assert.AreEqual("attributeValueA", dynamicObject.Attribute("attribute"));
 
             Assert.AreEqual("attributeValueB1", dynamicObject.b.Attribute("attribute1"));
             Assert.AreEqual(string.Empty, dynamicObject.b.Attribute("attribute2"));
@@ -311,6 +313,27 @@ namespace SharpShooting.Dynamic.Tests
 
             Assert.AreEqual("attributeValueE1", dynamicObject.e[0].Attribute("attribute"));
             Assert.AreEqual("attributeValueE2", dynamicObject.e[1].Attribute("attribute"));
+        }
+
+        [TestMethod]
+        public void ShouldGetValueFromAttributeIfItExistsByNotBypassingRootElement()
+        {
+            const string xml = XmlHeader + "<a attribute='attributeValueA'><b attribute1='attributeValueB1' attribute2=''/><c attribute='attributeValueC'><cc/></c><d attribute='attributeValueD'><dd/><dd/></d><e attribute='attributeValueE1'/><e attribute='attributeValueE2'/></a>";
+
+            dynamic dynamicObject = new DynamicXmlObject(xml, false);
+
+            Assert.AreEqual("attributeValueA", dynamicObject.Attribute("attribute"));
+
+            Assert.AreEqual("attributeValueB1", dynamicObject.a.b.Attribute("attribute1"));
+            Assert.AreEqual(string.Empty, dynamicObject.a.b.Attribute("attribute2"));
+
+            Assert.IsNull(dynamicObject.a.b.Attribute("attribute3"));
+
+            Assert.AreEqual("attributeValueC", dynamicObject.a.c.Attribute("attribute"));
+            Assert.AreEqual("attributeValueD", dynamicObject.a.d.Attribute("attribute"));
+
+            Assert.AreEqual("attributeValueE1", dynamicObject.a.e[0].Attribute("attribute"));
+            Assert.AreEqual("attributeValueE2", dynamicObject.a.e[1].Attribute("attribute"));
         }
 
         [TestMethod]
