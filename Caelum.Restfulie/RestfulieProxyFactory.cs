@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.Http;
+using Microsoft.Http.Headers;
 using SharpShooting.Http;
 
 namespace Caelum.Restfulie.Tests
@@ -23,6 +24,11 @@ namespace Caelum.Restfulie.Tests
         {
             var httpResponseMessage = _httpClient.Send(HttpMethod.GET, _uri);
 
+            return NewRestfulieProxy(httpResponseMessage);
+        }
+
+        private RestfulieProxy NewRestfulieProxy(HttpResponseMessage httpResponseMessage)
+        {
             return new RestfulieProxy(_httpClient, _dynamicContentParserFactory, _httpMethodDiscoverer)
                        {
                            LatestHttpResponseMessage = httpResponseMessage,
@@ -30,9 +36,13 @@ namespace Caelum.Restfulie.Tests
                        };
         }
 
-        public RestfulieProxy Create(object content)
+        public RestfulieProxy Create(string contentType, object content)
         {
-            throw new NotImplementedException();
+            var requestHeaders = new RequestHeaders { ContentType = contentType };
+
+            var httpResponseMessage = _httpClient.Send(HttpMethod.POST, _uri, requestHeaders, HttpContent.Create(content.ToString()));
+
+            return NewRestfulieProxy(httpResponseMessage);
         }
     }
 }

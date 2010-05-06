@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.Http;
+using Microsoft.Http.Headers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using SharpShooting.Http;
@@ -11,72 +12,111 @@ namespace Caelum.Restfulie.Tests
     {
         private Mock<IHttpClient> _httpClientMock;
         private Mock<IDynamicContentParserFactory> _dynamicContentParserFactoryMock;
-        private Mock<IHttpMethodDiscoverer> _httpMethodDiscoveryMock;
+        private Mock<IHttpMethodDiscoverer> _httpMethodDiscovererMock;
 
         [TestInitialize]
         public void TestInitialize()
         {
             _httpClientMock = new Mock<IHttpClient>();
             _dynamicContentParserFactoryMock = new Mock<IDynamicContentParserFactory>();
-            _httpMethodDiscoveryMock = new Mock<IHttpMethodDiscoverer>();
+            _httpMethodDiscovererMock = new Mock<IHttpMethodDiscoverer>();
         }
 
         [TestMethod]
         public void ShouldDoAGetHttpRequestToUri()
         {
-            var theGetHttpMethod = HttpMethod.GET;
+            const HttpMethod theGetHttpMethod = HttpMethod.GET;
             var theUri = new Uri("http://localhost");
 
-            SetupHttpClientMock(theGetHttpMethod, theUri, new HttpResponseMessage());
+            _httpClientMock.Setup(it => it.Send(theGetHttpMethod, theUri)).Returns(new HttpResponseMessage());
 
-            new RestfulieProxyFactory(theUri, _httpClientMock.Object, _dynamicContentParserFactoryMock.Object, _httpMethodDiscoveryMock.Object)
+            new RestfulieProxyFactory(theUri, _httpClientMock.Object, _dynamicContentParserFactoryMock.Object, _httpMethodDiscovererMock.Object)
                 .Get();
 
             _httpClientMock.Verify(it => it.Send(theGetHttpMethod, theUri), Times.Once());
         }
 
         [TestMethod]
-        public void ShouldSetLatestHttpResponseMessageUponEntryPoint()
+        public void ShouldSetHttpResponseMessageToRestfulieProxy()
         {
             var httpResponseMessage = new HttpResponseMessage();
 
             _httpClientMock.SetupHttpClientMock(httpResponseMessage);
 
-            var resource = new RestfulieProxyFactory(It.IsAny<Uri>(), _httpClientMock.Object, _dynamicContentParserFactoryMock.Object, _httpMethodDiscoveryMock.Object)
+            var resource = new RestfulieProxyFactory(It.IsAny<Uri>(), _httpClientMock.Object, _dynamicContentParserFactoryMock.Object, _httpMethodDiscovererMock.Object)
                 .Get();
 
             Assert.AreSame(httpResponseMessage, resource.LatestHttpResponseMessage);
         }
 
         [TestMethod]
-        public void ShouldReturnRestfulieProxyWithDynamicXmlContentParserUponReceivingResponseWithXmlContentType()
+        public void ShouldReturnRestfulieProxyWithDynamicXmlContentParserUponRecievingResponseWithXmlContentTypeOnGet()
         {
             const string orderXml = "<?xml version='1.0' encoding='UTF-8'?>\r\n<resource/>";
 
             _httpClientMock.SetupHttpClientMock(new HttpResponseMessage());
 
-            SetupDynamicContentParserFactoryMock(new DynamicXmlContentParser(orderXml));
+            _dynamicContentParserFactoryMock.Setup(it => it.New(It.IsAny<HttpContent>())).Returns(new DynamicXmlContentParser(orderXml));
 
-            var resource = new RestfulieProxyFactory(It.IsAny<Uri>(), _httpClientMock.Object, _dynamicContentParserFactoryMock.Object, _httpMethodDiscoveryMock.Object)
+            var resource = new RestfulieProxyFactory(It.IsAny<Uri>(), _httpClientMock.Object, _dynamicContentParserFactoryMock.Object, _httpMethodDiscovererMock.Object)
                 .Get();
 
-            Assert.IsInstanceOfType(
-                resource,
-                typeof(RestfulieProxy));
+            Assert.IsInstanceOfType(resource.DynamicContentParser, typeof(DynamicXmlContentParser));
+        }
+
+        [TestMethod]
+        public void ShouldDoAPostHttpRequestToUri()
+        {
+            const HttpMethod thePostHttpMethod = HttpMethod.POST;
+            var theUri = new Uri("http://localhost");
+
+            var anyContent = new object();
+
+            _httpClientMock.Setup(it => it.Send(thePostHttpMethod, theUri, It.IsAny<RequestHeaders>(), It.IsAny<HttpContent>())).Returns(new HttpResponseMessage());
+
+            new RestfulieProxyFactory(theUri, _httpClientMock.Object, _dynamicContentParserFactoryMock.Object, _httpMethodDiscovererMock.Object)
+                .Create(It.IsAny<string>(), anyContent);
+
+            _httpClientMock.Verify(it => it.Send(thePostHttpMethod, theUri, It.IsAny<RequestHeaders>(), It.IsAny<HttpContent>()), Times.Once());
+        }
+
+        [TestMethod]
+        public void ShouldReturnRestfulieProxyWithDynamicXmlContentParserUponRecievingResponseWithXmlContentTypeOnCreate()
+        {
+            const string orderXml = "<?xml version='1.0' encoding='UTF-8'?>\r\n<resource/>";
+            var anyContent = new object();
+
+            _httpClientMock
+                .Setup(it => it.Send(It.IsAny<HttpMethod>(), It.IsAny<Uri>(), It.IsAny<RequestHeaders>(), It.IsAny<HttpContent>()))
+                .Returns(new HttpResponseMessage());
+
+            _dynamicContentParserFactoryMock.Setup(it => it.New(It.IsAny<HttpContent>())).Returns(new DynamicXmlContentParser(orderXml));
+
+            var resource = new RestfulieProxyFactory(It.IsAny<Uri>(), _httpClientMock.Object, _dynamicContentParserFactoryMock.Object, _httpMethodDiscovererMock.Object)
+                .Create(It.IsAny<string>(), anyContent);
 
             Assert.IsInstanceOfType(
                 resource.DynamicContentParser,
                 typeof(DynamicXmlContentParser));
         }
-        
-        private void SetupHttpClientMock(HttpMethod httpMethod, Uri uri, HttpResponseMessage httpResponseMessageToReturn)
-        {
-            _httpClientMock.Setup(it => it.Send(httpMethod, uri)).Returns(httpResponseMessageToReturn);
-        }
 
-        private void SetupDynamicContentParserFactoryMock(IDynamicContentParser dynamicContentParser)
+        [TestMethod, Ignore]
+        public void ShouldSetContentStringAndContentTypeToHttpRequest()
         {
-            _dynamicContentParserFactoryMock.Setup(it => it.New(It.IsAny<HttpContent>())).Returns(dynamicContentParser);
+            // carlos.mendonca: no idea how to test this.
+
+            const string contentType = "application/xml";
+            var content = new object();
+
+            _httpClientMock
+                .Setup(it => it.Send(It.IsAny<HttpMethod>(), It.IsAny<Uri>(), It.IsAny<RequestHeaders>(), It.IsAny<HttpContent>()))
+                .Returns(new HttpResponseMessage());
+
+            var resource = new RestfulieProxyFactory(It.IsAny<Uri>(), _httpClientMock.Object, _dynamicContentParserFactoryMock.Object, _httpMethodDiscovererMock.Object)
+                .Create(contentType, content);
+
+            Assert.AreEqual(content.ToString(), resource.LatestHttpResponseMessage.Request.Content.ReadAsString());
+            Assert.AreEqual(contentType, resource.LatestHttpResponseMessage.Request.Headers.ContentType);
         }
     }
 }
