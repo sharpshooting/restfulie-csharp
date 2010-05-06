@@ -4,6 +4,8 @@
     {
         RestfulieProxy Get();
 
-        RestfulieProxy Create(string contentType, object content);
+        RestfulieProxy Create(object content);
+
+        IRestfulieProxyFactory As(string contentType);
     }
 }

@@ -30,7 +30,7 @@ namespace Caelum.Restfulie.Tests
 
             _httpClientMock.Setup(it => it.Send(theGetHttpMethod, theUri)).Returns(new HttpResponseMessage());
 
-            new RestfulieProxyFactory(theUri, _httpClientMock.Object, _dynamicContentParserFactoryMock.Object, _httpMethodDiscovererMock.Object)
+            new Restfulie(theUri, _httpClientMock.Object, _dynamicContentParserFactoryMock.Object, _httpMethodDiscovererMock.Object)
                 .Get();
 
             _httpClientMock.Verify(it => it.Send(theGetHttpMethod, theUri), Times.Once());
@@ -43,7 +43,7 @@ namespace Caelum.Restfulie.Tests
 
             _httpClientMock.SetupHttpClientMock(httpResponseMessage);
 
-            var resource = new RestfulieProxyFactory(It.IsAny<Uri>(), _httpClientMock.Object, _dynamicContentParserFactoryMock.Object, _httpMethodDiscovererMock.Object)
+            var resource = new Restfulie(It.IsAny<Uri>(), _httpClientMock.Object, _dynamicContentParserFactoryMock.Object, _httpMethodDiscovererMock.Object)
                 .Get();
 
             Assert.AreSame(httpResponseMessage, resource.LatestHttpResponseMessage);
@@ -58,7 +58,7 @@ namespace Caelum.Restfulie.Tests
 
             _dynamicContentParserFactoryMock.Setup(it => it.New(It.IsAny<HttpContent>())).Returns(new DynamicXmlContentParser(orderXml));
 
-            var resource = new RestfulieProxyFactory(It.IsAny<Uri>(), _httpClientMock.Object, _dynamicContentParserFactoryMock.Object, _httpMethodDiscovererMock.Object)
+            var resource = new Restfulie(It.IsAny<Uri>(), _httpClientMock.Object, _dynamicContentParserFactoryMock.Object, _httpMethodDiscovererMock.Object)
                 .Get();
 
             Assert.IsInstanceOfType(resource.DynamicContentParser, typeof(DynamicXmlContentParser));
@@ -74,8 +74,8 @@ namespace Caelum.Restfulie.Tests
 
             _httpClientMock.Setup(it => it.Send(thePostHttpMethod, theUri, It.IsAny<RequestHeaders>(), It.IsAny<HttpContent>())).Returns(new HttpResponseMessage());
 
-            new RestfulieProxyFactory(theUri, _httpClientMock.Object, _dynamicContentParserFactoryMock.Object, _httpMethodDiscovererMock.Object)
-                .Create(It.IsAny<string>(), anyContent);
+            new Restfulie(theUri, _httpClientMock.Object, _dynamicContentParserFactoryMock.Object, _httpMethodDiscovererMock.Object)
+                .Create(anyContent);
 
             _httpClientMock.Verify(it => it.Send(thePostHttpMethod, theUri, It.IsAny<RequestHeaders>(), It.IsAny<HttpContent>()), Times.Once());
         }
@@ -92,8 +92,8 @@ namespace Caelum.Restfulie.Tests
 
             _dynamicContentParserFactoryMock.Setup(it => it.New(It.IsAny<HttpContent>())).Returns(new DynamicXmlContentParser(orderXml));
 
-            var resource = new RestfulieProxyFactory(It.IsAny<Uri>(), _httpClientMock.Object, _dynamicContentParserFactoryMock.Object, _httpMethodDiscovererMock.Object)
-                .Create(It.IsAny<string>(), anyContent);
+            var resource = new Restfulie(It.IsAny<Uri>(), _httpClientMock.Object, _dynamicContentParserFactoryMock.Object, _httpMethodDiscovererMock.Object)
+                .Create(anyContent);
 
             Assert.IsInstanceOfType(
                 resource.DynamicContentParser,
@@ -112,8 +112,8 @@ namespace Caelum.Restfulie.Tests
                 .Setup(it => it.Send(It.IsAny<HttpMethod>(), It.IsAny<Uri>(), It.IsAny<RequestHeaders>(), It.IsAny<HttpContent>()))
                 .Returns(new HttpResponseMessage());
 
-            var resource = new RestfulieProxyFactory(It.IsAny<Uri>(), _httpClientMock.Object, _dynamicContentParserFactoryMock.Object, _httpMethodDiscovererMock.Object)
-                .Create(contentType, content);
+            var resource = new Restfulie(It.IsAny<Uri>(), _httpClientMock.Object, _dynamicContentParserFactoryMock.Object, _httpMethodDiscovererMock.Object)
+                .Create(content);
 
             Assert.AreEqual(content.ToString(), resource.LatestHttpResponseMessage.Request.Content.ReadAsString());
             Assert.AreEqual(contentType, resource.LatestHttpResponseMessage.Request.Headers.ContentType);
