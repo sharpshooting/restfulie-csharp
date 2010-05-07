@@ -21,17 +21,6 @@ namespace Caelum.Restfulie
             _httpMethodDiscoverer = httpMethodDiscoverer;
         }
 
-        public dynamic At(Uri uri)
-        {
-            LatestHttpResponseMessage = _httpClient.Send(HttpMethod.GET, uri);
-
-            return new RestfulieProxy(_httpClient, _dynamicContentParserFactory, _httpMethodDiscoverer)
-                       {
-                           LatestHttpResponseMessage = LatestHttpResponseMessage,
-                           DynamicContentParser = _dynamicContentParserFactory.New(LatestHttpResponseMessage.Content)
-                       };
-        }
-
         public override bool TryGetMember(GetMemberBinder binder, out object result)
         {
             if (binder.Name.Equals("statuscode", StringComparison.InvariantCultureIgnoreCase))
@@ -52,7 +41,7 @@ namespace Caelum.Restfulie
             {
                 var httpMethod = _httpMethodDiscoverer.MethodFor(binder.Name);
 
-                var latestHttpResponseMessage = _httpClient.Send(httpMethod, uri);
+                var latestHttpResponseMessage = _httpClient.Send(httpMethod, uri, null, null);
 
                 result = new RestfulieProxy(_httpClient, _dynamicContentParserFactory, _httpMethodDiscoverer)
                 {

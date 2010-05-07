@@ -24,7 +24,7 @@ namespace Caelum.Restfulie.Tests
 
         public RestfulieProxy Get()
         {
-            var httpResponseMessage = _httpClient.Send(HttpMethod.GET, _uri);
+            var httpResponseMessage = _httpClient.Send(HttpMethod.GET, _uri, null, null);
 
             return NewRestfulieProxy(httpResponseMessage);
         }

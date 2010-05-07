@@ -9,7 +9,7 @@ namespace Caelum.Restfulie.Tests
     {
         public static void SetupHttpClientMock(this Mock<IHttpClient> httpClientMock, HttpResponseMessage httpResponseMessageToReturn)
         {
-            httpClientMock.Setup(it => it.Send(It.IsAny<HttpMethod>(), It.IsAny<Uri>())).Returns(httpResponseMessageToReturn);
+            httpClientMock.Setup(it => it.Send(It.IsAny<HttpMethod>(), It.IsAny<Uri>(), null, null)).Returns(httpResponseMessageToReturn);
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Dynamic;
 using System.Net;
 using Microsoft.CSharp.RuntimeBinder;
 using Microsoft.Http;
+using Microsoft.Http.Headers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using SharpShooting.Http;
@@ -79,7 +80,7 @@ namespace Caelum.Restfulie.Tests
 
             order.refresh();
 
-            _httpClientMock.Verify(it => it.Send(HttpMethod.GET, new Uri("http://localhost/orders/1")), Times.Once());
+            _httpClientMock.Verify(it => it.Send(HttpMethod.GET, new Uri("http://localhost/orders/1"), It.IsAny<RequestHeaders>(), It.IsAny<HttpContent>()), Times.Once());
         }
 
         [TestMethod]
@@ -126,7 +127,7 @@ namespace Caelum.Restfulie.Tests
 
         private void SetupHttpClientMock(HttpResponseMessage httpResponseMessageToReturn)
         {
-            _httpClientMock.Setup(it => it.Send(It.IsAny<HttpMethod>(), It.IsAny<Uri>())).Returns(httpResponseMessageToReturn);
+            _httpClientMock.Setup(it => it.Send(It.IsAny<HttpMethod>(), It.IsAny<Uri>(), It.IsAny<RequestHeaders>(), It.IsAny<HttpContent>())).Returns(httpResponseMessageToReturn);
         }
 
         private class DynamicObjectStub : DynamicObject, IDynamicContentParser

@@ -28,12 +28,12 @@ namespace Caelum.Restfulie.Tests
             const HttpMethod theGetHttpMethod = HttpMethod.GET;
             var theUri = new Uri("http://localhost");
 
-            _httpClientMock.Setup(it => it.Send(theGetHttpMethod, theUri)).Returns(new HttpResponseMessage());
+            _httpClientMock.Setup(it => it.Send(theGetHttpMethod, theUri, It.IsAny<RequestHeaders>(), It.IsAny<HttpContent>())).Returns(new HttpResponseMessage());
 
             new Restfulie(theUri, _httpClientMock.Object, _dynamicContentParserFactoryMock.Object, _httpMethodDiscovererMock.Object)
                 .Get();
 
-            _httpClientMock.Verify(it => it.Send(theGetHttpMethod, theUri), Times.Once());
+            _httpClientMock.Verify(it => it.Send(theGetHttpMethod, theUri, It.IsAny<RequestHeaders>(), It.IsAny<HttpContent>()), Times.Once());
         }
 
         [TestMethod]
